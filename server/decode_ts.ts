@@ -1,5 +1,4 @@
-import stream from "stream";
-import { TsUtil, TsChar, TsStream, TsDate } from "@chinachu/aribts";
+import { TsUtil, TsChar, TsStream, TsDate } from "@tsukumijima/aribts";
 import zlib from "zlib";
 import { EntityParser, MediaType, parseMediaType, entityHeaderToString, parseMediaTypeFromString } from './entity_parser';
 import * as wsApi from "./ws_api";
