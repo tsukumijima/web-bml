@@ -287,12 +287,12 @@ export class BMLBrowser {
         return this.documentElement.querySelector("object[arib-type=\"video/X-arib-mpeg2\"]");
     }
 
-    public destroy(): void {
+    public async destroy(): Promise<void> {
         for (const font of this.fonts) {
             document.fonts.delete(font);
         }
         this.fonts.length = 0;
-        this.content.unloadAllDRCS();
+        await this.content.exitDocument();
         if (this.defaultAudioNodeProvider != null) {
             this.defaultAudioNodeProvider.destroy();
         }
