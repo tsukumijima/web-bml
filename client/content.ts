@@ -12,10 +12,9 @@ import { Interpreter } from "./interpreter/interpreter";
 import { BMLBrowserEventTarget, Indicator, InputApplication, KeyGroup, Profile as BMLBrowserProfile } from "./bml_browser";
 import { convertJPEG } from "./arib_jpeg";
 import { getTextDecoder } from "./text";
-// @ts-ignore
-import defaultCSS from "../public/default.css";
-// @ts-ignore
-import defaultCProfileCSS from "../public/default_c.css";
+
+import { defaultCSS } from "./default_css";
+import { defaultCProfileCSS } from "./default_c_css";
 
 export enum AribKeyCode {
     Up = 1,
