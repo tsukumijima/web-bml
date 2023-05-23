@@ -1294,7 +1294,7 @@ export class BrowserAPI {
             return NaN;
         },
         X_DPA_launchDocWithLink: (documentName: string): number => {
-            log("%X_DPA_launchDocWithLink", "font-size: 4em", documentName);
+            log("%cX_DPA_launchDocWithLink", "font-size: 4em", documentName);
             if (this.resources.profile !== resource.Profile.TrProfileC) {
                 return NaN;
             }

@@ -276,7 +276,7 @@ export class JSInterpreter implements Interpreter {
         }
 
         function X_DPA_launchDocWithLink(callback: (result: any, promiseValue: any) => void, documentName: string, transitionStyle: string | undefined): void {
-            browserLog("%X_DPA_launchDocWithLink", "font-size: 4em", documentName);
+            browserLog("%cX_DPA_launchDocWithLink", "font-size: 4em", documentName);
             if (resources.profile !== Profile.TrProfileC) {
                 callback(NaN, LAUNCH_DOCUMENT_CALLED);
                 return;
