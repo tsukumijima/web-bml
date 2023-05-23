@@ -2,7 +2,7 @@ const { Interpreter }: { Interpreter: any } = require("../../JS-Interpreter/inte
 import * as BT from "../binary_table";
 import { Interpreter } from "./interpreter";
 import { Content } from "../content";
-import { getTrace, getLog } from "../util/trace";
+import { getTrace, getLog, getWarn, getError } from "../util/logging";
 import { Profile, Resources } from "../resource";
 import { BML } from "../interface/DOM";
 import { BMLCSS2Properties } from "../interface/BMLCSS2Properties";
@@ -15,8 +15,11 @@ import { getTextDecoder } from "../text";
 
 const domTrace = getTrace("js-interpreter.dom");
 const eventTrace = getTrace("js-interpreter.event");
+const browserTrace = getTrace("js-interpreter.browser");
 const browserLog = getLog("js-interpreter.browser");
 const interpreterTrace = getTrace("js-interpreter");
+const interpreterWarn = getWarn("js-interpreter");
+const interpreterError = getError("js-interpreter");
 
 const LAUNCH_DOCUMENT_CALLED = {};
 
@@ -273,7 +276,7 @@ export class JSInterpreter implements Interpreter {
         }
 
         function X_DPA_launchDocWithLink(callback: (result: any, promiseValue: any) => void, documentName: string, transitionStyle: string | undefined): void {
-            console.log("%X_DPA_launchDocWithLink", "font-size: 4em", documentName);
+            browserLog("%X_DPA_launchDocWithLink", "font-size: 4em", documentName);
             if (resources.profile !== Profile.TrProfileC) {
                 callback(NaN, LAUNCH_DOCUMENT_CALLED);
                 return;
@@ -372,11 +375,11 @@ export class JSInterpreter implements Interpreter {
             const pseudoBinaryTable = interpreter.createAsyncFunction(function BinaryTable(this: any, callback: (result: any, resolveValue: any) => void, table_ref: string, structure: string) {
                 resources.fetchResourceAsync(table_ref).then(res => {
                     if (!res) {
-                        browserLog("BinaryTable", table_ref, "not found");
+                        browserTrace("BinaryTable", table_ref, "not found");
                         callback(null, undefined);
                         return;
                     }
-                    browserLog("new BinaryTable", table_ref);
+                    browserTrace("new BinaryTable", table_ref);
                     let buffer: Uint8Array = res.data;
                     this.instance = new BT.BinaryTable(buffer, structure, getTextDecoder(resources.profile));
                     callback(this, undefined);
@@ -438,7 +441,7 @@ export class JSInterpreter implements Interpreter {
                     var args = [null].concat(Array.from(arguments));
                     if (args.length <= 1 && value == null && resources.currentTimeUnixMillis != null) {
                         // currentDateMode=1ならtimeUnixMillisを取得した時間からオフセット追加とかが理想かもしれない
-                        browserLog("new Date()");
+                        browserTrace("new Date()");
                         this.data = new Interpreter.nativeGlobal.Date(resources.currentTimeUnixMillis);
                     } else {
                         this.data = new (Function.prototype.bind.apply(
@@ -493,15 +496,15 @@ export class JSInterpreter implements Interpreter {
                     interpreter.setNativeFunctionPrototype(interpreter.DATE, functions[i], wrapper);
                 }
                 interpreter.setNativeFunctionPrototype(interpreter.DATE, "toString", function (this: { data: Date }) {
-                    browserLog("Date.toString()", this.data);
+                    browserTrace("Date.toString()", this.data);
                     return bmlDate.toString.call(this.data);
                 });
                 interpreter.setNativeFunctionPrototype(interpreter.DATE, "toLocaleString", function (this: { data: Date }) {
-                    browserLog("Date.toLocaleString()", this.data);
+                    browserTrace("Date.toLocaleString()", this.data);
                     return bmlDate.toString.call(this.data);
                 });
                 interpreter.setNativeFunctionPrototype(interpreter.DATE, "toUTCString", function (this: { data: Date }) {
-                    browserLog("Date.toUTCString()", this.data);
+                    browserTrace("Date.toUTCString()", this.data);
                     return bmlDate.toUTCString.call(this.data);
                 });
             }
@@ -558,7 +561,7 @@ export class JSInterpreter implements Interpreter {
             while (true) {
                 interpreterTrace("RUN SCRIPT", exeNum, prevContext, this.content.context);
                 const r = await this.interpreter.runAsync(500, () => {
-                    console.warn("script execution timeout");
+                    interpreterWarn("script execution timeout");
                     return new Promise((resolve) => {
                         setTimeout(() => {
                             resolve(true);
@@ -573,13 +576,13 @@ export class JSInterpreter implements Interpreter {
                     interpreterTrace("browser.launchDocument called.");
                     exit = true;
                 } else if (this.content.context !== prevContext) {
-                    console.error("context switched", this.content.context, prevContext);
+                    interpreterError("context switched", this.content.context, prevContext);
                     exit = true;
                 }
                 break;
             }
             if (!exit && this.content.context !== prevContext) {
-                console.error("context switched", this.content.context, prevContext);
+                interpreterError("context switched", this.content.context, prevContext);
                 exit = true;
             }
         } finally {

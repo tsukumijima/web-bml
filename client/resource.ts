@@ -1,6 +1,10 @@
 import { parseMediaTypeFromString } from "../server/entity_parser";
 import { ComponentPMT, MediaType, ModuleListEntry, ProgramInfoMessage, ResponseMessage } from "../server/ws_api";
 import { Indicator, IP } from "./bml_browser";
+import { getTrace, getError } from "./util/logging";
+
+const trace = getTrace("resource");
+const error = getError("resource");
 
 type Module = {
     moduleId: number,
@@ -288,7 +292,7 @@ export class Resources {
 
     private revokeCachedFile(file: CachedFile): void {
         for (const blob of file.blobUrl.values()) {
-            console.log("revoke", blob.blobUrl);
+            trace("revoke", blob.blobUrl);
             URL.revokeObjectURL(blob.blobUrl);
         }
         file.blobUrl.clear();
@@ -302,7 +306,7 @@ export class Resources {
         if (this.lockedComponents.get(componentId)?.modules?.has(module.moduleId)) {
             return;
         }
-        console.log("revoke", moduleAndComponentToString(componentId, module.moduleId));
+        trace("revoke", moduleAndComponentToString(componentId, module.moduleId));
         for (const file of module.files.values()) {
             this.revokeCachedFile(file);
         }
@@ -462,11 +466,11 @@ export class Resources {
                 creq.moduleRequests.delete(msg.moduleId);
                 for (const cb of callbacks) {
                     if (cb.filename == null) {
-                        console.warn("async fetch done", str);
+                        trace("async fetch done", str);
                         cb.resolve(null);
                     } else {
                         const file = cachedModule.files.get(cb.filename);
-                        console.warn("async fetch done", str, cb.filename);
+                        trace("async fetch done", str, cb.filename);
                         cb.resolve(file ?? null);
                     }
                 }
@@ -498,7 +502,7 @@ export class Resources {
                     if (!component.modules.has(moduleId)) {
                         // DIIに存在しない
                         for (const mreq of mreqs) {
-                            console.warn("async fetch done (failed) DII", moduleAndComponentToString(msg.componentId, moduleId));
+                            trace("async fetch done (failed) DII", moduleAndComponentToString(msg.componentId, moduleId));
                             mreq.resolve(null);
                         }
                         creqs.moduleRequests.delete(moduleId);
@@ -530,7 +534,7 @@ export class Resources {
                 for (const [moduleId, mreqs] of creqs.moduleRequests) {
                     // PMTに存在しない
                     for (const mreq of mreqs) {
-                        console.warn("async fetch done (failed) PMT", moduleAndComponentToString(componentId, moduleId));
+                        trace("async fetch done (failed) PMT", moduleAndComponentToString(componentId, moduleId));
                         mreq.resolve(null);
                     }
                     creqs.moduleRequests.delete(moduleId);
@@ -552,7 +556,7 @@ export class Resources {
         } else if (msg.type === "pcr") {
             this.nearestPCRBase = msg.pcrBase;
         } else if (msg.type === "error") {
-            console.error(msg);
+            error(msg);
         }
     }
 
@@ -659,7 +663,7 @@ export class Resources {
         if (cachedComponent == null) {
             cachedComponent = this.cachedComponents.get(componentId);
             if (cachedComponent == null) {
-                console.error("component not found failed to fetch ", url);
+                error("component not found failed to fetch", url);
                 return null;
             }
         }
@@ -668,7 +672,7 @@ export class Resources {
             cachedComponent = this.cachedComponents.get(componentId);
             cachedModule = cachedComponent?.modules?.get(moduleId);
             if (cachedModule == null) {
-                console.error("module not found ", url);
+                error("module not found", url);
                 return null;
             }
         }
@@ -784,7 +788,7 @@ export class Resources {
         }
         // PMTにcomponentが存在しかつDIIにmoduleが存在するまたはDIIが取得されていないときにコールバックを登録
         // TODO: ModuleUpdated用にDII取得後に存在しないことが判明したときの処理が必要
-        console.warn("async fetch requested", url);
+        trace("async fetch requested", url);
         return new Promise((resolve, _) => {
             const c = this.componentRequests.get(componentId);
             const entry = { filename, resolve, requestType };

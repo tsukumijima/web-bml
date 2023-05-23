@@ -3,6 +3,9 @@ import { parseBinaryStructure, readBinaryFields, writeBinaryFields } from "./bin
 import { BroadcasterDatabase } from "./broadcaster_database";
 import { Resources } from "./resource";
 import { getTextDecoder, getTextEncoder } from "./text";
+import { getError } from "./util/logging";
+
+const error = getError("nvram");
 
 type NvramAccessId =
     "broadcaster_id" | // 事業者ごと(BSとCS)
@@ -317,34 +320,34 @@ export class NVRAM {
         for (const a of nvramArea.accessId) {
             if (a === "affiliation_id") {
                 if (broadcasterInfo.affiliationId == null) {
-                    console.error("affiliationId == null!");
+                    error("affiliationId == null!");
                     params.append("affiliation_id", String(accessInfo.affiliationId));
                 } else if (accessInfo.affiliationId == null) {
-                    console.error("affiliationId == null!", accessInfo);
+                    error("affiliationId == null!", accessInfo);
                     return null;
                 } else if (broadcasterInfo.affiliationId.includes(accessInfo.affiliationId)) {
                     params.append("affiliation_id", String(accessInfo.affiliationId));
                 } else {
-                    console.error("permission denied (affiliationId)", broadcasterInfo.affiliationId, accessInfo.affiliationId);
+                    error("permission denied (affiliationId)", broadcasterInfo.affiliationId, accessInfo.affiliationId);
                     return null;
                 }
             } else if (a === "broadcaster_id") {
                 if (accessInfo.broadcasterId == null) {
-                    console.error("broadcasterId == null!");
+                    error("broadcasterId == null!");
                     params.append("broadcaster_id", "null");
                 } else {
                     params.append("broadcaster_id", String(accessInfo.broadcasterId));
                 }
             } else if (a === "original_network_id") {
                 if (broadcasterInfo.originalNetworkId == null) {
-                    console.error("originalNetworkId == null!");
+                    error("originalNetworkId == null!");
                     params.append("original_network_id", "null");
                 } else {
                     params.append("original_network_id", String(broadcasterInfo.originalNetworkId));
                 }
             } else if (a === "affiliation_id;original_network_id") {
                 if (accessInfo.affiliationId == null || accessInfo.originalNetworkId == null) {
-                    console.error("invalid", accessInfo);
+                    error("invalid", accessInfo);
                     return null;
                 }
                 if (accessInfo.originalNetworkId >= 0x0000 && accessInfo.originalNetworkId <= 0x0003) {
@@ -353,27 +356,27 @@ export class NVRAM {
                     params.append("affiliation_id", String(accessInfo.affiliationId));
                 } else {
                     if (broadcasterInfo.originalNetworkId == null) {
-                        console.error("originalNetworkId == null!");
+                        error("originalNetworkId == null!");
                         params.append("original_network_id", String(accessInfo.originalNetworkId));
                     } else if (accessInfo.originalNetworkId == null) {
-                        console.error("originalNetworkId == null!", accessInfo);
+                        error("originalNetworkId == null!", accessInfo);
                         return null;
                     } else if (broadcasterInfo.originalNetworkId === accessInfo.originalNetworkId) {
                         params.append("original_network_id", String(accessInfo.originalNetworkId));
                     } else {
-                        console.error("permission denied (original_network_id)", broadcasterInfo.originalNetworkId, accessInfo.originalNetworkId);
+                        error("permission denied (original_network_id)", broadcasterInfo.originalNetworkId, accessInfo.originalNetworkId);
                         return null;
                     }
                     if (broadcasterInfo.affiliationId == null) {
-                        console.error("affiliationId == null!");
+                        error("affiliationId == null!");
                         params.append("affiliation_id", String(accessInfo.affiliationId));
                     } else if (accessInfo.affiliationId == null) {
-                        console.error("affiliationId == null!", accessInfo);
+                        error("affiliationId == null!", accessInfo);
                         return null;
                     } else if (broadcasterInfo.affiliationId.includes(accessInfo.affiliationId)) {
                         params.append("affiliation_id", String(accessInfo.affiliationId));
                     } else {
-                        console.error("permission denied (affiliationId)", broadcasterInfo.affiliationId, accessInfo.affiliationId);
+                        error("permission denied (affiliationId)", broadcasterInfo.affiliationId, accessInfo.affiliationId);
                         return null;
                     }
                 }
@@ -390,13 +393,13 @@ export class NVRAM {
             const key = `${broadcasterInfo.originalNetworkId}.${broadcasterInfo.broadcasterId}`;
             const blockPermission = this.providerAreaPermission.get(key);
             if (blockPermission == null) {
-                console.error("permission not set (nvrams)");
+                error("permission not set (nvrams)");
                 return null;
             }
             if (accessInfo.block != null) {
                 const allowedServiceId = blockPermission.serviceIdList[accessInfo.block];
                 if (allowedServiceId !== 0xffff && allowedServiceId !== broadcasterInfo.serviceId) {
-                    console.error("permission denied (nvrams serviceId)", allowedServiceId, broadcasterInfo.serviceId);
+                    error("permission denied (nvrams serviceId)", allowedServiceId, broadcasterInfo.serviceId);
                     return null;
                 }
             }
@@ -430,13 +433,13 @@ export class NVRAM {
             const binfo = this.getBroadcasterInfo();
             const result = this.findNvramArea(uri, binfo);
             if (!result) {
-                console.error("readNVRAM: findNvramArea failed", uri);
+                error("readNVRAM: findNvramArea failed", uri);
                 return null;
             }
             const [id, area] = result;
             const k = this.getLocalStorageKey(binfo, id, area);
             if (!k) {
-                console.error("readNVRAM: access denied", uri);
+                error("readNVRAM: access denied", uri);
                 return null;
             }
             strg = localStorage.getItem(this.prefix + k);
@@ -490,19 +493,19 @@ export class NVRAM {
         const binfo = this.getBroadcasterInfo();
         const result = this.findNvramArea(uri, binfo);
         if (!result) {
-            console.error("writeNVRAM: findNvramArea failed", uri);
+            error("writeNVRAM: findNvramArea failed", uri);
             return NaN;
         }
         const [id, area] = result;
         if (area.isFixed) {
             if (data.length > area.size) {
-                console.error("writeNVRAM: too large data", uri, data.length, area);
+                error("writeNVRAM: too large data", uri, data.length, area);
                 return NaN;
             }
         }
         const k = this.getLocalStorageKey(binfo, id, area);
         if (!k) {
-            console.error("writeNVRAM: access denied", uri);
+            error("writeNVRAM: access denied", uri);
             return NaN;
         }
         if (area.isSecure && id.block != null) {
@@ -541,7 +544,7 @@ export class NVRAM {
             return NaN;
         }
         if (fields.length > data.length) {
-            console.error("writePersistentArray: fields.length > data.length");
+            error("writePersistentArray: fields.length > data.length");
             return NaN;
         }
         let bin = writeBinaryFields(data, fields, getTextEncoder(this.resources.profile));
@@ -620,7 +623,7 @@ export class NVRAM {
             return NaN;
         }
         if (fields.length > data.length) {
-            console.error("writePersistentArrayWithAccessCheck: fields.length > data.length");
+            error("writePersistentArrayWithAccessCheck: fields.length > data.length");
             return NaN;
         }
         let bin = writeBinaryFields(data, fields, getTextEncoder(this.resources.profile));

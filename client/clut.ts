@@ -1,4 +1,8 @@
 import { defaultCLUT } from './default_clut';
+import { getError } from "./util/logging";
+
+const error = getError("clut");
+
 export function readCLUT(clut: Buffer): number[][] {
     let table = defaultCLUT.slice();
     const prevLength = table.length;
@@ -20,7 +24,7 @@ export function readCLUT(clut: Buffer): number[][] {
         index += 2;
         index += 2;
         // 運用されない
-        console.error("region is not operated");
+        error("region is not operated");
     }
     let startIndex: number;
     let endIndex: number;

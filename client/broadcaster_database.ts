@@ -3,6 +3,9 @@
 // 地上波の場合多様なのでBITを受信するとlocalStorageに保存する
 import { ResponseMessage } from "../server/ws_api";
 import * as resource from "./resource";
+import { getError } from "./util/logging";
+
+const error = getError("broadcaster-database");
 
 type Broadcaster = {
     services: {
@@ -165,7 +168,7 @@ export class BroadcasterDatabase {
             const key = `${this.broadcastersPrefix}${msg.originalNetworkId}`;
             const tbid = msg.broadcasters.filter(x => x.terrestrialBroadcasterId != null);
             if (tbid.length > 1) {
-                console.error(tbid);
+                error(tbid);
             }
             const v: Broadcaster = {
                 services: Object.fromEntries(msg.broadcasters.flatMap(x => x.services.map(y => [`${y.serviceId}`, { broadcasterId: x.broadcasterId }]))),

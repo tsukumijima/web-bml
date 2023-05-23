@@ -2,6 +2,10 @@
 import { BML } from "./interface/DOM";
 import { Interpreter } from "./interpreter/interpreter";
 import { Resources } from "./resource";
+import { getTrace, getLog } from "./util/logging";
+
+const trace = getTrace("event-queue");
+const log = getLog("event-queue");
 
 interface BMLEvent {
     type: string;
@@ -107,7 +111,7 @@ export class EventDispatcher {
     }
 
     public dispatchModuleLockedEvent(module: string, isEx: boolean, status: number) {
-        console.log("ModuleLocked", module);
+        trace("ModuleLocked", module);
         const moduleLocked = (BML.bmlNodeToNode(this.bmlDocument.documentElement) as HTMLElement).querySelectorAll("beitem[type=\"ModuleLocked\"]");
         const { componentId, moduleId } = this.resources.parseURLEx(module);
         for (const beitem of Array.from(moduleLocked)) {
@@ -139,7 +143,7 @@ export class EventDispatcher {
     }
 
     public dispatchTimerFiredEvent(status: number, beitem: Element) {
-        console.log("TimerFired", status);
+        trace("TimerFired", status);
         if (beitem.getAttribute("subscribe") !== "subscribe") {
             return;
         }
@@ -162,7 +166,7 @@ export class EventDispatcher {
     }
 
     public dispatchDataButtonPressedEvent() {
-        console.log("DataButtonPressed");
+        log("DataButtonPressed");
         const moduleLocked = (BML.bmlNodeToNode(this.bmlDocument.documentElement) as HTMLElement).querySelectorAll("beitem[type=\"DataButtonPressed\"]");
         for (const beitem of Array.from(moduleLocked)) {
             if (beitem.getAttribute("subscribe") !== "subscribe") {
@@ -188,7 +192,7 @@ export class EventDispatcher {
     }
 
     public dispatchMainAudioStreamChangedEvent(prevComponentId: number, prevChannelId: number | undefined, componentId: number, channelId: number | undefined): void {
-        console.log("MainAudioStreamChanged");
+        log("MainAudioStreamChanged");
         const moduleLocked = (BML.bmlNodeToNode(this.bmlDocument.documentElement) as HTMLElement).querySelectorAll("beitem[type=\"MainAudioStreamChanged\"]");
         for (const beitem of Array.from(moduleLocked)) {
             if (beitem.getAttribute("subscribe") !== "subscribe") {
@@ -338,9 +342,9 @@ export class EventQueue {
         if (!groups) {
             throw new Error("invalid event handler attribute " + handler);
         }
-        console.debug("EXECUTE", handler);
+        trace("EXECUTE", handler);
         const result = await this.interpreter.runEventHandler(groups.funcName);
-        console.debug("END", handler);
+        trace("END", handler);
         return result;
     }
 

@@ -14,6 +14,10 @@ import { playAIFF } from "../arib_aiff";
 import { unicodeToJISMap } from "../unicode_to_jis_map";
 import { ModuleListEntry } from "../../server/ws_api";
 import { getTextDecoder, getTextEncoder } from "../text";
+import { getTrace, getError } from "../util/logging";
+
+const trace = getTrace("dom");
+const error = getError("dom");
 
 export namespace BML {
     type DOMString = string;
@@ -125,7 +129,7 @@ export namespace BML {
         } else if (node instanceof globalThis.HTMLFormElement) {
             return BMLFormElement;
         } else if (node instanceof globalThis.HTMLElement) {
-            console.error(node);
+            error(node);
             return HTMLElement;
         } else if (node instanceof globalThis.Element) {
             return Element;
@@ -137,7 +141,7 @@ export namespace BML {
         } else if (node instanceof globalThis.CharacterData) {
             return CharacterData;
         } else if (node instanceof globalThis.Node) {
-            console.error(node);
+            error(node);
             return Node;
         }
         return Node;
@@ -939,7 +943,7 @@ export namespace BML {
             return this.node.method;
         }
         public submit(): void {
-            console.error("HTMLFormElement submit");
+            error("HTMLFormElement submit");
         }
     }
 
@@ -1110,7 +1114,7 @@ export namespace BML {
                         // streamstatus=stopのとき非表示 streampositionは0にリセットされる
                         // streamstatus=pauseのとき streampositionで指定されたフレームを表示
                         if (this.streamStatus !== "stop") {
-                            console.error("unexpected streamStatus", this.streamStatus, this.data);
+                            error("unexpected streamStatus", this.streamStatus, this.data);
                         }
                         this.updateAnimation();
                         return;
@@ -1407,7 +1411,7 @@ export namespace BML {
                 const isGIF = fetched.data[0] === 0x47 && fetched.data[1] === 0x49 && fetched.data[2] === 0x46;
                 const isJPEG = fetched.data[0] === 0xff && fetched.data[1] === 0xd8 && fetched.data[2] === 0xff && fetched.data[3] === 0xe0;
                 if (!isGIF && !isJPEG) {
-                    console.error("unknown media", value);
+                    error("unknown media", value);
                     return;
                 }
                 let imageUrl: CachedFileMetadata | undefined;
@@ -1727,7 +1731,7 @@ export namespace BML {
             if (!this.subscribe) {
                 return;
             }
-            console.log("ModuleUpdated", module, status);
+            trace("ModuleUpdated", module, status);
             const onoccur = this.node.getAttribute("onoccur");
             if (!onoccur) {
                 return;

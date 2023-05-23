@@ -12,6 +12,12 @@ import { Interpreter } from "./interpreter/interpreter";
 import { BMLBrowserEventTarget, Indicator, InputApplication, KeyGroup, Profile as BMLBrowserProfile } from "./bml_browser";
 import { convertJPEG } from "./arib_jpeg";
 import { getTextDecoder } from "./text";
+import { getTrace, getLog, getWarn, getError } from "./util/logging";
+
+const trace = getTrace("content");
+const log = getLog("content");
+const warn = getWarn("content");
+const error = getError("content");
 
 import { defaultCSS } from "./default_css";
 import { defaultCProfileCSS } from "./default_c_css";
@@ -264,7 +270,7 @@ export class Content {
 
         this.resources.addEventListener("dataeventchanged", async (event) => {
             const { component, returnToEntryFlag } = event.detail;
-            console.log("DataEventChanged", event.detail);
+            trace("DataEventChanged", event.detail);
             const { moduleId, componentId } = this.resources.parseURLEx(this.resources.activeDocument);
             if (moduleId == null || componentId == null) {
                 return;
@@ -305,7 +311,7 @@ export class Content {
                         // 引き戻しフラグによるエントリコンポーネントへの遷移の場合lockModuleOnMemoryでロックしたモジュールのロックが解除される TR-B14 第二分冊 表5-11
                         this.resources.unlockModules("lockModuleOnMemory");
                     }
-                    console.error("launch startup (DataEventChanged)");
+                    error("launch startup (DataEventChanged)");
                     this.launchStartup();
                     return true;
                 }
@@ -368,7 +374,7 @@ export class Content {
                     this.exitDocument();
                     return;
                 }
-                console.error("PID changed", prevPID, currentPID, prevEntryPID, currentEntryPID);
+                error("PID changed", prevPID, currentPID, prevEntryPID, currentEntryPID);
                 this.eventQueue.queueGlobalAsyncEvent(async () => {
                     this.resources.unlockModules();
                     this.resources.clearCache();
@@ -603,7 +609,7 @@ export class Content {
             });
             if (await this.eventQueue.executeEventHandler(onunload)) {
                 // readPersistentArray writePersistentArray unlockModuleOnMemoryEx unlockAllModulesOnMemoryしか呼び出せないので終了したらおかしい
-                console.error("onunload");
+                error("onunload");
                 return true;
             }
             this.eventDispatcher.resetCurrentEvent();
@@ -797,7 +803,7 @@ export class Content {
             }
             const onload = this.getBody()?.getAttribute("arib-onload");
             if (onload != null) {
-                console.debug("START ONLOAD");
+                trace("START ONLOAD");
                 this.eventDispatcher.setCurrentEvent({
                     target: null,
                     type: "load",
@@ -806,7 +812,7 @@ export class Content {
                     return true;
                 }
                 this.eventDispatcher.resetCurrentEvent();
-                console.debug("END ONLOAD");
+                trace("END ONLOAD");
             }
             for (const beitem of this.documentElement.querySelectorAll("beitem[subscribe=\"subscribe\"]")) {
                 const bmlBeitem = BML.nodeToBMLNode(beitem, this.bmlDocument) as BML.BMLBeitemElement;
@@ -817,11 +823,11 @@ export class Content {
                 this.eventQueue.unlockSyncEventQueue();
             }
         }
-        console.debug("START PROC EVQ");
+        trace("START PROC EVQ");
         if (await this.eventQueue.processEventQueue()) {
             return true;
         }
-        console.debug("END PROC EVQ");
+        trace("END PROC EVQ");
         this.indicator?.setUrl(this.resources.activeDocument.replace(/(^https?:\/\/)[^/]+/, (_, g: string) => g + "…"), false);
         return false;
     }
@@ -893,7 +899,7 @@ export class Content {
 
     private async launchDocumentAsync(documentName: string, options?: LaunchDocumentOptions) {
         const withLink = options?.withLink ?? false;
-        console.log("%claunchDocument", "font-size: 4em", documentName);
+        log("%claunchDocument", "font-size: 4em", documentName);
         this.eventQueue.discard();
         const { component, module, filename } = this.resources.parseURL(documentName);
         const componentId = Number.parseInt(component ?? "", 16);
@@ -912,13 +918,13 @@ export class Content {
                     // > 受信機が非リンクを搭載していない場合、再選局相当の動作を行なう、または、遷移を行わずにリンク状態を継続する
                     // C 8.3.11.4 受信機の動作失敗時のガイドライン
                     // > ベースURIディレクトリに合致しないURIが指定された場合は、データ放送ブラウザは失敗動作とし、受信機はエラーメッセージを表示する
-                    console.error("base URI directory violation");
+                    error("base URI directory violation");
                     await this.fail("エラー", "ベースURIディレクトリエラー", "E402");
                     return NaN;
                 }
                 normalizedDocument = new URL(documentName, this.resources.activeDocument).toString();
             } else {
-                console.error("failed to fetch document", documentName);
+                error("failed to fetch document", documentName);
                 await this.quitDocument();
                 return NaN;
             }
@@ -934,13 +940,13 @@ export class Content {
             if (normalizedDocument.startsWith("http")) {
                 this.fail("ネットワークエラー", "文書の取得に失敗しました", "E400");
             }
-            console.error("NOT FOUND");
+            error("NOT FOUND");
             await this.quitDocument();
             return NaN;
         }
         const ad = this.resources.activeDocument;
         await this.loadDocument(res, normalizedDocument);
-        console.log("return ", ad, documentName);
+        trace("return ", ad, documentName);
         return NaN;
     }
 
@@ -1043,7 +1049,7 @@ export class Content {
                 const elem = this.documentElement.querySelector(`[accesskey="${accessKey}"]`) as HTMLElement;
                 if (elem != null && this.isFocusable(elem)) {
                     this.focusHelper(elem);
-                    console.warn("accesskey is half implemented.");
+                    warn("accesskey is half implemented.");
                     // [6] 疑似的にkeyup割り込み事象が発生 keyCode = アクセスキー
                     const onkeyup = elem.getAttribute("onkeyup");
                     if (onkeyup != null) {
@@ -1352,7 +1358,7 @@ export class Content {
                             scaleDenominator: nptReference.scaleDenominator,
                             scaleNumerator: nptReference.scaleNumerator,
                         };
-                        console.log("NPTReferred", this.npt);
+                        trace("NPTReferred", this.npt);
                     }
                     const nptReferred = this.documentElement.querySelectorAll("beitem[type=\"NPTReferred\"][subscribe=\"subscribe\"]");
                     for (const beitemNative of Array.from(nptReferred)) {
@@ -1456,7 +1462,7 @@ export class Content {
                     }
                     beitem.internalMessageVersion.set(eventMessageId, eventMessageVersion);
                     const privateData = this.decodeText(Uint8Array.from(event.privateDataByte));
-                    console.log("EventMessageFired", eventMessageId, eventMessageVersion, privateData);
+                    trace("EventMessageFired", eventMessageId, eventMessageVersion, privateData);
                     this.eventQueue.queueAsyncEvent(async () => {
                         this.eventDispatcher.setCurrentBeventEvent({
                             type: "EventMessageFired",
