@@ -1198,7 +1198,11 @@ export class Content {
             if (keyCode === AribKeyCode.Enter) {
                 currentFocus.internalSetFocus(true);
             }
-            const computedStyle = window.getComputedStyle(this.getBody()!);
+            const body = this.getBody();
+            if (body == null) {
+                return false;
+            }
+            const computedStyle = window.getComputedStyle(body);
             const usedKeyList = computedStyle.getPropertyValue("--used-key-list").split(" ").filter(x => x.length);
             if (usedKeyList.length && usedKeyList[0] === "none") {
                 return false;
