@@ -609,7 +609,7 @@ export class BrowserAPI {
             return 1;
         },
         transmitTextDataOverIP: async (uri: string, text: string, charset: string): Promise<[number, string, string]> => {
-            log("transmitTextDataOverIP", uri, text, charset);
+            log(`transmitTextDataOverIP(${uri}, ${text}, ${charset})`);
             if (this.ip.transmitTextDataOverIP == null) {
                 return [NaN, "", ""];
             }
@@ -642,7 +642,7 @@ export class BrowserAPI {
             }
         },
         confirmIPNetwork: async (destination: string, confirmType: number, timeout?: number): Promise<[boolean, string | null, number | null] | null> => {
-            log("confirmIPNetwork", destination, confirmType, timeout);
+            log(`confirmIPNetwork(${destination}, ${confirmType}, ${timeout})`);
             if (this.ip.confirmIPNetwork == null) {
                 return null;
             }
@@ -731,7 +731,7 @@ export class BrowserAPI {
                 trace("epgGetEventDuration", event_ref);
                 return this.resources.durationSeconds ?? NaN;
             }
-            error("epgGetEventDuration", event_ref);
+            error("epgGetEventDuration: not implemented", event_ref, this.resources.eventId);
             return NaN;
         },
         setCurrentDateMode: (time_mode: number): number => {
@@ -921,7 +921,7 @@ export class BrowserAPI {
             return 1;
         },
         getBrowserSupport: (sProvider: string, functionname: string, ...additionalinfoList: string[]): number => {
-            log("getBrowserSupport", sProvider, functionname, ...additionalinfoList);
+            log(`getBrowserSupport(${sProvider}, ${functionname}, ${additionalinfoList})`);
             const additionalinfo: string | undefined = additionalinfoList[0] ?? undefined;
             const additionalinfo2: string | undefined = additionalinfoList[1] ?? undefined;
             const additionalinfo3: string | undefined = additionalinfoList[2] ?? undefined;
@@ -1057,7 +1057,7 @@ export class BrowserAPI {
             return 0;
         },
         getBrowserStatus: (sProvider: string, statusname: string, additionalinfo: string): number => {
-            log("getBrowserStatus", sProvider, statusname, additionalinfo);
+            log(`getBrowserStatus(${sProvider}, ${statusname}, ${additionalinfo})`);
             if (sProvider === "TerrP" || sProvider === "DPA" /* Cプロファイル */) {
                 if (statusname === "IRDState") {
                     if (additionalinfo === "Link") {
@@ -1075,7 +1075,7 @@ export class BrowserAPI {
             return NaN;
         },
         launchDocument: (documentName: string, transitionStyle?: string): number => {
-            log("%claunchDocument", "font-size: 4em", documentName, transitionStyle);
+            log(`%claunchDocument(${documentName}, ${transitionStyle})`, "font-size: 1.5em");
             this.content.launchDocument(documentName);
             this.interpreter.destroyStack();
             throw new Error("unreachable!!");
@@ -1170,11 +1170,11 @@ export class BrowserAPI {
             } else if (type == 9) {
                 return toHex(this.resources.networkId, 4);
             }
-            error("getProgramID", type);
+            error(`getProgramID(${type})`);
             return null;
         },
         playRomSound: (soundID: string): number => {
-            log("playRomSound", soundID);
+            log(`playRomSound(${soundID})`);
             const groups = /romsound:\/\/(?<soundID>\d+)/.exec(soundID)?.groups;
             if (groups != null) {
                 playRomSound(Number.parseInt(groups.soundID), this.audioNodeProvider.getAudioDestinationNode());
@@ -1191,7 +1191,7 @@ export class BrowserAPI {
             return -1;
         },
         getIRDID(type: number): string | null {
-            log("getIRDID", type);
+            log(`getIRDID(${type})`);
             if (type === 5) {
                 // 20桁のB-CAS番号のうち後ろ5桁のチェックサムを除去したもの
                 // const cardID = "000012345678901";
@@ -1202,12 +1202,12 @@ export class BrowserAPI {
         },
         isIPConnected: (): number => {
             const result = this.ip.isIPConnected?.() ?? 0;
-            log("isIPConnected", result);
+            log(`isIPConnected(${result})`);
             return result;
         },
         getConnectionType: (): number => {
             const result = this.ip.getConnectionType?.() ?? 403;
-            log("getConnectionType", result);
+            log(`getConnectionType(${result})`);
             return result; // Ethernet DHCP
         },
         setInterval: (evalCode: string, msec: number, iteration: number): number => {
@@ -1290,11 +1290,11 @@ export class BrowserAPI {
         },
         X_DPA_writeCproBM: (title: string, dstURI: string, outline: string, CproBMtype: number, expire?: Date): number => {
             // テレビリンクの登録
-            error("X_DPA_writeCproBM", title, dstURI, outline, CproBMtype, expire);
+            error(`X_DPA_writeCproBM(${title}, ${dstURI}, ${outline}, ${CproBMtype}, ${expire})`);
             return NaN;
         },
         X_DPA_launchDocWithLink: (documentName: string): number => {
-            log("%cX_DPA_launchDocWithLink", "font-size: 4em", documentName);
+            log(`%cX_DPA_launchDocWithLink(${documentName})`, "font-size: 1.5em");
             if (this.resources.profile !== resource.Profile.TrProfileC) {
                 return NaN;
             }

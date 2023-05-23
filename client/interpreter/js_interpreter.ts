@@ -255,7 +255,7 @@ export class JSInterpreter implements Interpreter {
         const epg = this.epg;
         const resources = this.resources;
         function launchDocument(callback: (result: any, promiseValue: any) => void, documentName: string, transitionStyle: string | undefined): void {
-            browserLog("launchDocument", documentName, transitionStyle);
+            browserLog(`launchDocument(${documentName}, ${transitionStyle})`);
             if (documentName.startsWith("#")) {
                 // Cプロファイル TR-B14 第三分冊
                 // 8.2.3.4 #fragment運用における受信機動作およびコンテンツガイドライン
@@ -270,13 +270,13 @@ export class JSInterpreter implements Interpreter {
         }
 
         function reloadActiveDocument(callback: (result: any, promiseValue: any) => void): void {
-            browserLog("reloadActiveDocument");
+            browserLog("reloadActiveDocument()");
             const r = content.launchDocument(browser.getActiveDocument()!);
             callback(r, LAUNCH_DOCUMENT_CALLED);
         }
 
         function X_DPA_launchDocWithLink(callback: (result: any, promiseValue: any) => void, documentName: string, transitionStyle: string | undefined): void {
-            browserLog("%cX_DPA_launchDocWithLink", "font-size: 4em", documentName);
+            browserLog(`%cX_DPA_launchDocWithLink(${documentName})`, "font-size: 1.5em");
             if (resources.profile !== Profile.TrProfileC) {
                 callback(NaN, LAUNCH_DOCUMENT_CALLED);
                 return;
@@ -299,7 +299,7 @@ export class JSInterpreter implements Interpreter {
         }
 
         function epgTune(callback: (result: any, promiseValue: any) => void, service_ref: string): void {
-            browserLog("%cepgTune", "font-size: 4em", service_ref);
+            browserLog(`%cepgTune(${service_ref})`, "font-size: 1.5em");
             const { originalNetworkId, transportStreamId, serviceId } = resources.parseServiceReference(service_ref);
             if (originalNetworkId == null || transportStreamId == null || serviceId == null) {
                 callback(NaN, LAUNCH_DOCUMENT_CALLED);

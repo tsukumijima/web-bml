@@ -899,7 +899,7 @@ export class Content {
 
     private async launchDocumentAsync(documentName: string, options?: LaunchDocumentOptions) {
         const withLink = options?.withLink ?? false;
-        log("%claunchDocument", "font-size: 4em", documentName);
+        log(`%claunchDocument(${documentName})`, "font-size: 1.5em");
         this.eventQueue.discard();
         const { component, module, filename } = this.resources.parseURL(documentName);
         const componentId = Number.parseInt(component ?? "", 16);
