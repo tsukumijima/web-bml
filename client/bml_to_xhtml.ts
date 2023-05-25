@@ -1,7 +1,7 @@
 import { XMLBuilder, XMLParser } from "fast-xml-parser";
 
 function findXmlNode(xml: any[], nodeName: string): any {
-    const result = [];
+    const result: any[] = [];
     for (const i of xml) {
         if (getXmlNodeName(i) === nodeName) {
             result.push(i);

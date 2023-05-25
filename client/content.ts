@@ -1250,7 +1250,7 @@ export class Content {
     }
 
     private clutToDecls(table: number[][]): css.Declaration[] {
-        const ret = [];
+        const ret: css.Declaration[] = [];
         let i = 0;
         for (const t of table) {
             const decl: css.Declaration = {

@@ -119,7 +119,7 @@ export class EntityParser {
             }
         }
         const contentType = headers.find(x => x.name === "content-type");
-        let multipartBody = null;
+        let multipartBody: Entity[] | null = null;
         if (contentType != null && contentType.name === "content-type") {
             const mediaType = parseMediaType(contentType.value).mediaType;
             if (mediaType != null && mediaType.type === "multipart" && mediaType.subtype === "mixed") {

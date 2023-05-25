@@ -486,7 +486,7 @@ export class JSInterpreter implements Interpreter {
                                 thisInterpreter.throwException(thisInterpreter.TYPE_ERROR,
                                     nativeFunc + ' not called on a Date');
                             }
-                            var args = [];
+                            var args: any[] = [];
                             for (var i = 0; i < arguments.length; i++) {
                                 args[i] = thisInterpreter.pseudoToNative(arguments[i]);
                             }
