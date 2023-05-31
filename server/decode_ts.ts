@@ -330,6 +330,7 @@ export function decodeTS(options: DecodeTSOptions): TsStream {
                     eventName: null,
                     startTimeUnixMillis: null,
                     durationSeconds: null,
+                    indefiniteDuration: null,
                     networkId: ids.nid,
                 };
                 send(currentProgramInfo);
@@ -369,6 +370,7 @@ export function decodeTS(options: DecodeTSOptions): TsStream {
         const event = data.events[0];
         const duration = new TsDate(event.duration).decodeTime();
         const durationSeconds = duration[0] * 3600 + duration[1] * 60 + duration[2];
+        const indefiniteDuration = duration[0] === 0xff && duration[1] === 0xff && duration[2] === 0xff;
         const startTime =  new TsDate(event.start_time).decode();
         const eventId: number = event.event_id;
         const descriptors: any[] = event.descriptors;
@@ -384,6 +386,7 @@ export function decodeTS(options: DecodeTSOptions): TsStream {
             eventName: shortEventName,
             startTimeUnixMillis: startTime?.getTime(),
             durationSeconds: durationSeconds,
+            indefiniteDuration,
             networkId: ids.nid,
         };
         if (prevProgramInfo?.eventId !== currentProgramInfo.eventId ||
@@ -393,6 +396,7 @@ export function decodeTS(options: DecodeTSOptions): TsStream {
             prevProgramInfo?.startTimeUnixMillis !== currentProgramInfo.startTimeUnixMillis ||
             prevProgramInfo?.eventName !== currentProgramInfo.eventName ||
             prevProgramInfo?.durationSeconds !== currentProgramInfo.durationSeconds ||
+            prevProgramInfo?.indefiniteDuration !== currentProgramInfo.indefiniteDuration ||
             prevProgramInfo?.networkId !== currentProgramInfo.networkId) {
             send(currentProgramInfo);
         }
@@ -459,6 +463,7 @@ export function decodeTS(options: DecodeTSOptions): TsStream {
             eventName: event_name_char,
             startTimeUnixMillis: event_start_time,
             durationSeconds: null,
+            indefiniteDuration: null,
             networkId: null,
         };
         send(currentProgramInfo);
