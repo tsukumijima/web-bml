@@ -1,3 +1,5 @@
+import { Buffer } from "buffer";
+
 // STD-B24 TR-B14 TR-B15で規定されるAIFFのサブセットを再生する
 // 12 kHz 1ch 16-bit
 

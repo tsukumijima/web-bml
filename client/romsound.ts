@@ -18,6 +18,7 @@
  * 15:
 **/
 
+import { Buffer } from "buffer";
 import { romsoundData } from "./romsound_data";
 
 function playBuffer(destination: AudioNode, buf: Float32Array, sampleRate: number) {

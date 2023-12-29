@@ -1,6 +1,6 @@
 import { TsUtil, TsChar, TsStream, TsDate } from "@tsukumijima/aribts";
 import { Buffer } from "buffer";
-import zlib from "browserify-zlib";
+import pako from "pako";
 import { EntityParser, MediaType, parseMediaType, entityHeaderToString, parseMediaTypeFromString } from './entity_parser';
 import * as wsApi from "./ws_api";
 import { ComponentPMT, AdditionalAribBXMLInfo } from './ws_api';
@@ -633,7 +633,7 @@ export function decodeTS(options: DecodeTSOptions): TsStream {
                     return;
                 }
                 if (moduleInfo.compressionType === CompressionType.Zlib) {
-                    moduleData = zlib.inflateSync(moduleData);
+                    moduleData = Buffer.from(pako.inflate(moduleData));
                 }
                 const mediaType = moduleInfo.contentType == null ? null : parseMediaTypeFromString(moduleInfo.contentType).mediaType;
                 // console.info(`component ${componentId.toString(16).padStart(2, "0")} module ${moduleId.toString(16).padStart(4, "0")}updated`);

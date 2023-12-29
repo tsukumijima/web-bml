@@ -1,3 +1,4 @@
+import { Buffer } from "buffer";
 import { defaultCLUT } from './default_clut';
 import { getError } from "./util/logging";
 

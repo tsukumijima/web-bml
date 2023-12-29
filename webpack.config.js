@@ -33,7 +33,6 @@ module.exports = {
             path: false,  // for css (reworkcss-css)
             url: false,  // for source-map-resolve
             vm: false,  // for JS-Interpreter
-            stream: require.resolve('stream-browserify'),  // for browserify-zlib
         },
     },
     devtool: 'source-map',
