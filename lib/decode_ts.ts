@@ -1,5 +1,6 @@
 import { TsUtil, TsChar, TsStream, TsDate } from "@tsukumijima/aribts";
-import zlib from "zlib";
+import { Buffer } from "buffer";
+import zlib from "browserify-zlib";
 import { EntityParser, MediaType, parseMediaType, entityHeaderToString, parseMediaTypeFromString } from './entity_parser';
 import * as wsApi from "./ws_api";
 import { ComponentPMT, AdditionalAribBXMLInfo } from './ws_api';

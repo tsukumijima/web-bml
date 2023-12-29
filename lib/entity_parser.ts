@@ -1,3 +1,5 @@
+import { Buffer } from "buffer";
+
 // RFC2068 7.1 Entity Header Fields
 //
 // entity-header  = Allow                    ; Section 14.7
