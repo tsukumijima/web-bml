@@ -1,5 +1,9 @@
 /node_modules
 /.env
-/dist
+/dist/arib.js*
+/dist/play_local.js*
+/dist/video_list.js*
+/dist/*.ttf
+/dist/d.ts/server/*
 /hls
 /build
