@@ -14,12 +14,7 @@ Webブラウザで動作するデータ放送ブラウザ(BMLブラウザ)
 
 ## 使い方
 
-git clone --recursiveするかサブモジュールを初期化
-
-```sh
-git submodule init
-git submodule update
-```
+まずは git clone します。
 
 Mirakurunからの放送、EPGStationからの録画または引数に与えたファイルを再生できます。
 

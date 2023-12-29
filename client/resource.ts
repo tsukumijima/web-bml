@@ -1,5 +1,5 @@
-import { parseMediaTypeFromString } from "../lib/entity_parser";
-import { ComponentPMT, MediaType, ModuleListEntry, ProgramInfoMessage, ResponseMessage } from "../lib/ws_api";
+import { parseMediaTypeFromString, MediaType } from "../lib/entity_parser";
+import { ComponentPMT, ModuleListEntry, ProgramInfoMessage, ResponseMessage } from "../lib/ws_api";
 import { Indicator, IP } from "./bml_browser";
 import { getTrace, getError } from "./util/logging";
 

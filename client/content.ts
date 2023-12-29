@@ -9,7 +9,7 @@ import { bmlToXHTMLFXP } from "./bml_to_xhtml";
 import { NPTReference, ResponseMessage } from "../lib/ws_api";
 import { EventDispatcher, EventQueue } from "./event_queue";
 import { Interpreter } from "./interpreter/interpreter";
-import { BMLBrowserEventTarget, Indicator, InputApplication, KeyGroup, Profile as BMLBrowserProfile } from "./bml_browser";
+import { BMLBrowserEventTarget, Indicator, InputApplication, KeyGroup, BMLBrowserProfile } from "./bml_browser";
 import { convertJPEG } from "./arib_jpeg";
 import { getTextDecoder } from "./text";
 import { getTrace, getLog, getWarn, getError } from "./util/logging";

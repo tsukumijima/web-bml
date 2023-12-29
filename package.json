@@ -1,7 +1,8 @@
 {
   "name": "web-bml",
   "version": "1.0.0",
-  "main": "server/index.ts",
+  "main": "dist/web_bml.js",
+  "types": "dist/d.ts/lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
     "@tsukumijima/aribts": "github:tsukumijima/node-aribts#v1.4.0",

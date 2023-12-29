@@ -1,3 +1,5 @@
+import { MediaType } from "./entity_parser";
+
 // /api/ws?param=JSON
 
 // Mirakurun系のAPIを使ってtsを取得
@@ -63,9 +65,6 @@ export type PMTMessage = {
     components: ComponentPMT[],
 };
 
-import { MediaType as EMediaType } from "./entity_parser";
-
-export type MediaType = EMediaType;
 export type ModuleFile = {
     contentLocation: string | null,
     contentType: MediaType,
