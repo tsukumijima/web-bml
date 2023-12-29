@@ -1230,14 +1230,14 @@ export namespace BML {
                         const keyframes = this.effect.getKeyframes();
                         const keyframe = keyframes[Math.max(0, Math.min(value, keyframes.length - 1))];
                         timing.delay = -(keyframe.computedOffset * duration);
-                        this.effect.updateTiming(timing);
+                        this.effect.updateTiming(timing as any);
                     }
                 }
             } else {
                 if (this.effect != null) {
                     const timing = this.effect.getTiming();
                     timing.delay = 0;
-                    this.effect.updateTiming(timing);
+                    this.effect.updateTiming(timing as any);
                 }
                 this.node.setAttribute("streamposition", "0");
             }
@@ -1328,7 +1328,7 @@ export namespace BML {
                     // play=>pause どのフレームを表示するかは受信機依存 streampositionはそのフレームに設定される 繰り返し回数はリセット
                     this.animation.pause();
                     const duration = Number(this.effect.getTiming().duration);
-                    this.streamPosition = BMLObjectElement.offsetToFrame(this.effect.getKeyframes(), ((this.animation.currentTime! - this.animation.startTime!) % duration) / duration);
+                    this.streamPosition = BMLObjectElement.offsetToFrame(this.effect.getKeyframes(), (((this.animation.currentTime as any) - (this.animation.startTime as any)) % duration) / duration);
                 } else if (prevStatus === "stop") {
                     // stop=>pause 0フレーム目が表示される
                     this.streamPosition = 0;
