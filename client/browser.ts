@@ -5,7 +5,7 @@ import * as drcs from "./drcs";
 import { Interpreter } from "./interpreter/interpreter";
 import { EventDispatcher, EventQueue } from "./event_queue";
 import { Content } from "./content";
-import { ResponseMessage } from "../server/ws_api";
+import { ResponseMessage } from "../lib/ws_api";
 import { playRomSound } from "./romsound";
 import { AudioNodeProvider, Indicator, IP, Reg } from "./bml_browser";
 import { decodeEUCJP, encodeEUCJP, stripStringEUCJP } from "./euc_jp";

@@ -1,8 +1,8 @@
-import { ResponseMessage } from "../server/ws_api";
+import { ResponseMessage } from "../lib/ws_api";
 import { BMLBrowser, BMLBrowserFontFace, EPG } from "./bml_browser";
 import { RemoteControl } from "./remote_controller_client";
 import { keyCodeToAribKey } from "./content";
-import { decodeTS } from "../server/decode_ts";
+import { decodeTS } from "../lib/decode_ts";
 import { CaptionPlayer } from "./player/caption_player";
 import { OverlayInputApplication } from "./overlay_input";
 

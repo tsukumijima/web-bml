@@ -6,7 +6,7 @@ import { transpileCSS } from "./transpile_css";
 import { Buffer } from "buffer";
 import { BML } from "./interface/DOM";
 import { bmlToXHTMLFXP } from "./bml_to_xhtml";
-import { NPTReference, ResponseMessage } from "../server/ws_api";
+import { NPTReference, ResponseMessage } from "../lib/ws_api";
 import { EventDispatcher, EventQueue } from "./event_queue";
 import { Interpreter } from "./interpreter/interpreter";
 import { BMLBrowserEventTarget, Indicator, InputApplication, KeyGroup, Profile as BMLBrowserProfile } from "./bml_browser";

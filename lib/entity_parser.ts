@@ -1,5 +1,5 @@
 // RFC2068 7.1 Entity Header Fields
-// 
+//
 // entity-header  = Allow                    ; Section 14.7
 //                | Content-Base             ; Section 14.11
 //                | Content-Encoding         ; Section 14.12

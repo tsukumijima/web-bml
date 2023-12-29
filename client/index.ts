@@ -1,4 +1,4 @@
-import { BaseParam, EPGStationRecordedParam, MirakLiveParam, Param, ResponseMessage } from "../server/ws_api";
+import { BaseParam, EPGStationRecordedParam, MirakLiveParam, Param, ResponseMessage } from "../lib/ws_api";
 import { MP4VideoPlayer } from "./player/mp4";
 import { MPEGTSVideoPlayer } from "./player/mpegts";
 import { HLSVideoPlayer } from "./player/hls";

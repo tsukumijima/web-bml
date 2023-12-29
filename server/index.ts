@@ -5,7 +5,7 @@ import 'dotenv/config'
 import path from "path";
 import stream from "stream";
 import websocket, { WebSocketContext } from "koa-easy-ws";
-import * as wsApi from "./ws_api";
+import * as wsApi from "../lib/ws_api";
 import { WebSocket } from "ws";
 import http from "http";
 import https from "https";
@@ -13,7 +13,7 @@ import dns from "dns/promises";
 import { randomUUID } from 'crypto';
 import { DataBroadcastingStream, LiveStream } from './stream/live_stream';
 import { HLSLiveStream } from './stream/hls_stream';
-import { decodeTS } from './decode_ts';
+import { decodeTS } from '../lib/decode_ts';
 import { downloadFonts } from './font';
 downloadFonts();
 

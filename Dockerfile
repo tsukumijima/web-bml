@@ -23,4 +23,4 @@ EXPOSE 23234
 
 ENV HOST 0.0.0.0
 
-CMD ["node", "build/index.js"]
+CMD ["node", "build/server/index.js"]

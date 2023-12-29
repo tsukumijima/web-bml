@@ -123,7 +123,7 @@ export type NPTReference = {
     STCReference: number,
     NPTReference: number,
     scaleNumerator: number,
-    scaleDenominator: number,  
+    scaleDenominator: number,
 };
 
 export type ESEventUpdatedMessage = {
