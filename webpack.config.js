@@ -33,16 +33,12 @@ module.exports = {
             path: false,  // for css (reworkcss-css)
             url: false,  // for source-map-resolve
             vm: false,  // for JS-Interpreter
-            Buffer: require.resolve('buffer'),  // for node-aribts
-            stream: require.resolve('stream-browserify'),  // for node-aribts
+            stream: require.resolve('stream-browserify'),  // for browserify-zlib
         },
     },
     devtool: 'source-map',
     // babelのため
     plugins: [
-        new webpack.ProvidePlugin({
-            Buffer: ['buffer', 'Buffer'],  // for node-aribts
-        }),
         new webpack.ProvidePlugin({
             acorn: path.resolve(__dirname, 'JS-Interpreter', 'acorn.js')  // for JS-Interpreter
         }),
