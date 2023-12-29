@@ -3,7 +3,7 @@ const webpack = require('webpack')
 
 module.exports = {
     entry: {
-        web_bml: './lib/index.ts',
+        'web-bml': './lib/index.ts',
         arib: './client/index.ts',
         play_local: './client/play_local.ts',
         video_list: './client/video_list.tsx',

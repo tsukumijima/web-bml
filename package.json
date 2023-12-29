@@ -1,7 +1,7 @@
 {
   "name": "web-bml",
   "version": "1.0.0",
-  "main": "dist/web_bml.js",
+  "main": "dist/web-bml.js",
   "types": "dist/d.ts/lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
