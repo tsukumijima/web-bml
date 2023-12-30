@@ -11,8 +11,15 @@ module.exports = {
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: '[name].js',
+        library: '[name]',
+        libraryTarget: 'umd',
+        libraryExport: 'default',
+        umdNamedDefine: true,
+        publicPath: '/',
     },
+    bail: true,
     module: {
+        strictExportPresence: true,
         rules: [
             {
                 test: /\.tsx?$/,
