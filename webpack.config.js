@@ -2,6 +2,7 @@ const path = require('path');
 const webpack = require('webpack')
 
 module.exports = {
+    mode: 'production',
     entry: {
         'web-bml': './lib/index.ts',
         arib: './client/index.ts',
@@ -11,11 +12,11 @@ module.exports = {
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: '[name].js',
-        library: '[name]',
-        libraryTarget: 'umd',
-        libraryExport: 'default',
-        umdNamedDefine: true,
-        publicPath: '/',
+        library: {
+            name: 'WebBML',
+            type: 'umd',
+        },
+        globalObject: 'this',
     },
     bail: true,
     module: {
@@ -52,5 +53,5 @@ module.exports = {
 };
 
 if (process.env.NODE_ENV == null) {
-    module.exports.mode = "development";
+    module.exports.mode = 'development';
 }

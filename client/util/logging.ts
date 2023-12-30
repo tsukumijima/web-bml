@@ -1,6 +1,6 @@
 
 export function getTrace(_channel: string): (message?: any, ...optionalParams: any[]) => void {
-    if (typeof localStorage !== "undefined" && !localStorage.getItem("trace")) {
+    if (typeof localStorage === "undefined" || localStorage.getItem("trace") === null) {
         return () => {};
     }
     return (message?: any, ...optionalParams: any[]) => {

@@ -4,6 +4,7 @@
 /dist/play_local.js*
 /dist/video_list.js*
 /dist/*.ttf
+/dist/*.txt
 /dist/d.ts/server/*
 /hls
 /build
