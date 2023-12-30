@@ -80,7 +80,7 @@ export function decodeTS(options: DecodeTSOptions): TsStream {
     let patRetrieved = false;
 
     if (dumpError) {
-        tsStream.on("drop", (pid: any, counter: any, expected: any) => {
+        tsStream.on("drop", (pid: number, counter: any, expected: any) => {
             let time = "unknown";
 
             if (tsUtil.hasTime()) {
@@ -94,7 +94,7 @@ export function decodeTS(options: DecodeTSOptions): TsStream {
         });
     }
 
-    tsStream.on("info", (data: any) => {
+    tsStream.on("info", (data: { [key: string]: any }) => {
         console.error("");
         console.error("info:");
         Object.keys(data).forEach(key => {
@@ -102,7 +102,7 @@ export function decodeTS(options: DecodeTSOptions): TsStream {
         });
     });
 
-    tsStream.on("tdt", (pid: any, data: any) => {
+    tsStream.on("tdt", (pid: number, data: { [key: string]: any }) => {
         tsUtil.addTdt(pid, data);
         const time = tsUtil.getTime()?.getTime();
         if (time != null && currentTime !== time) {
@@ -114,7 +114,7 @@ export function decodeTS(options: DecodeTSOptions): TsStream {
         }
     });
 
-    tsStream.on("tot", (pid: any, data: any) => {
+    tsStream.on("tot", (pid: number, data: { [key: string]: any }) => {
         tsUtil.addTot(pid, data);
         const time = tsUtil.getTime()?.getTime();
         if (time != null && currentTime !== time) {
@@ -126,7 +126,7 @@ export function decodeTS(options: DecodeTSOptions): TsStream {
         }
     });
 
-    tsStream.on("pat", (pid: any, data: any) => {
+    tsStream.on("pat", (pid: number, data: { [key: string]: any }) => {
         patRetrieved = true;
         tsUtil.addPat(pid, data);
         const programs: { program_number: number, network_PID?: number, program_map_PID?: number }[] = data.programs;
@@ -149,7 +149,7 @@ export function decodeTS(options: DecodeTSOptions): TsStream {
         pidToProgramNumber = pat;
     });
 
-    tsStream.on("pmt", (pid: any, data: any) => {
+    tsStream.on("pmt", (pid: number, data: { [key: string]: any }) => {
         // 多重化されている
         if (!oneSeg && pidToProgramNumber.size !== 1) {
             if (pidToProgramNumber.size === 0 && pid === 0x1fc8 && !patRetrieved) {
@@ -424,15 +424,15 @@ export function decodeTS(options: DecodeTSOptions): TsStream {
         sendStreamInfo();
     });
 
-    tsStream.on("sit", (pid: any, data: any) => {
+    tsStream.on("sit", (pid: number, data: { [key: string]: any }) => {
         const services = data.services[0].service;
-        const short_event_descriptor = services.filter((data: any) => data.descriptor_tag === 0x4D);
+        const short_event_descriptor = services.filter((data: { [key: string]: any }) => data.descriptor_tag === 0x4D);
         const event_name_char = new TsChar(short_event_descriptor[0].event_name_char).decode();
         const serviceId = data.services[0].service_id;
 
         let tot_descriptor;
-        const transmission_tot = data.transmission_info.filter((data: any) => data.descriptor_tag === 0xC3);
-        const service_tot = services.filter((data: any) => data.descriptor_tag === 0xC3);
+        const transmission_tot = data.transmission_info.filter((data: { [key: string]: any }) => data.descriptor_tag === 0xC3);
+        const service_tot = services.filter((data: { [key: string]: any }) => data.descriptor_tag === 0xC3);
         let jst_time = 0;
         let event_start_time = 0;
 
@@ -447,11 +447,11 @@ export function decodeTS(options: DecodeTSOptions): TsStream {
             event_start_time = new TsDate(service_tot[0].event_start_time).decode().getTime();
         }
 
-        const event_group_descriptor = services.filter((data: any) => data.descriptor_tag === 0xD6);
+        const event_group_descriptor = services.filter((data: { [key: string]: any }) => data.descriptor_tag === 0xD6);
         let event_Id = null;
         if (event_group_descriptor.length > 0) {
-            if (event_group_descriptor[0].events.filter((data: any) => data.service_id === serviceId).length > 0) {
-                event_Id = event_group_descriptor[0].events.filter((data: any) => data.service_id === serviceId)[0].event_id;
+            if (event_group_descriptor[0].events.filter((data: { [key: string]: any }) => data.service_id === serviceId).length > 0) {
+                event_Id = event_group_descriptor[0].events.filter((data: { [key: string]: any }) => data.service_id === serviceId)[0].event_id;
             }
         }
 
@@ -478,7 +478,7 @@ export function decodeTS(options: DecodeTSOptions): TsStream {
         }
     });
 
-    tsStream.on("dsmcc", (pid: any, data: any) => {
+    tsStream.on("dsmcc", (pid: number, data: { [key: string]: any }) => {
         const c = pidToComponent.get(pid);
         if (c == null) {
             return;

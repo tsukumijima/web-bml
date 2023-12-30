@@ -136,7 +136,8 @@ async function openReadableStream(stream: ReadableStream<Uint8Array>) {
         const chunkSize = 188 * 100;
         for (let i = 0; i < chunk.length; i += chunkSize) {
             const prevPCR = pcr;
-            tsStream._transform(chunk!.subarray(i, i + chunkSize), null, () => { });
+            // @ts-ignore
+            tsStream._transform(chunk!.subarray(i, i + chunkSize), null, () => {});
             const curPCR = pcr;
             const nowTime = performance.now();
             if (prevPCR == null) {
