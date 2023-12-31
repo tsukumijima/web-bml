@@ -1,9 +1,21 @@
 {
   "name": "web-bml",
   "version": "1.0.0",
+  "license": "MIT",
   "main": "dist/web-bml.js",
   "types": "dist/d.ts/lib/index.d.ts",
-  "license": "MIT",
+  "exports": {
+    ".": {
+      "require": "./dist/web-bml.js",
+      "import": "./dist/web-bml.js",
+      "types": "./dist/d.ts/lib/index.d.ts"
+    },
+    "./worker": {
+      "require": "./dist/web-bml-worker.js",
+      "import": "./dist/web-bml-worker.js",
+      "types": "./dist/d.ts/lib/worker.d.ts"
+    }
+  },
   "dependencies": {
     "@tsukumijima/aribts": "github:tsukumijima/node-aribts#v1.5.1",
     "arib-subtitle-timedmetadater": "^4.0.10",

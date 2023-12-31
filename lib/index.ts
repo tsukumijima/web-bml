@@ -1,26 +1,5 @@
-// (window / document などの DOM API が存在しない) Web Worker や Node.js 環境からこの index.ts をインポートした場合、
-// 下記の ../client/ 以下で定義されているブラウザ向けライブラリの再帰的インポートが行われた時点で DOM API の未定義により例外が発生してしまう
-// これを避けるため、window が定義されていない環境では window に globalThis を代入し、インポートだけは通るようにしておく
-// それ以外は Polyfill できないので、やむを得ず空のオブジェクトを代入する
-if (typeof window === 'undefined') {
-    (globalThis as any).window = globalThis;
-}
-if (typeof document === 'undefined') {
-    (globalThis as any).document = {};
-}
-if (typeof location === 'undefined') {
-    (globalThis as any).location = {};
-}
-if (typeof navigator === 'undefined') {
-    (globalThis as any).navigator = {};
-}
-if (typeof screen === 'undefined') {
-    (globalThis as any).screen = {};
-}
-
-export * from './decode_ts';
-export * from './entity_parser';
-export * from './ws_api';
+// worker.ts にて export された DOM API 非依存のライブラリに加え、DOM API 依存のデータ放送描画ライブラリも export されるエントリーポイント
+export * from './worker';
 export * from '../client/interface/BMLCSS2Properties';
 export * from '../client/interface/DOM';
 export * from '../client/interpreter/interpreter';

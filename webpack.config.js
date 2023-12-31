@@ -5,6 +5,7 @@ module.exports = {
     mode: 'production',
     entry: {
         'web-bml': './lib/index.ts',
+        'web-bml-worker': './lib/worker.ts',
         arib: './client/index.ts',
         play_local: './client/play_local.ts',
         video_list: './client/video_list.tsx',
@@ -13,7 +14,6 @@ module.exports = {
         path: path.resolve(__dirname, 'dist'),
         filename: '[name].js',
         library: {
-            name: 'WebBML',
             type: 'umd',
         },
         globalObject: 'this',

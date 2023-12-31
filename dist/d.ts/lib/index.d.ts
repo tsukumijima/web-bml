@@ -1,6 +1,4 @@
-export * from './decode_ts';
-export * from './entity_parser';
-export * from './ws_api';
+export * from './worker';
 export * from '../client/interface/BMLCSS2Properties';
 export * from '../client/interface/DOM';
 export * from '../client/interpreter/interpreter';
