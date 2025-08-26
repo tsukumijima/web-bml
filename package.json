@@ -38,7 +38,7 @@
     "react-dom": "^18.2.0"
   },
   "scripts": {
-    "start": "node build/index.js",
+    "start": "node build/server/index.js",
     "build": "webpack --mode=production && tsc -p tsconfig.server.json",
     "watch:client": "webpack --mode=development -w",
     "dev": "ts-node server/index.ts"
