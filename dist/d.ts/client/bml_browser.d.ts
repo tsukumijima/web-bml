@@ -20,13 +20,13 @@ export interface EPG {
 export interface IP {
     isIPConnected?(): number;
     getConnectionType?(): number;
-    transmitTextDataOverIP?(uri: string, body: Uint8Array): Promise<{
+    transmitTextDataOverIP?(uri: string, body: Uint8Array<ArrayBuffer>): Promise<{
         resultCode: number;
         statusCode: string;
         response: Uint8Array;
     }>;
     get?(uri: string): Promise<{
-        response?: Uint8Array;
+        response?: Uint8Array<ArrayBuffer>;
         headers?: Headers;
         statusCode?: number;
     }>;
@@ -109,7 +109,7 @@ interface CustomEventTarget<M> {
 }
 export type BMLBrowserEventTarget = CustomEventTarget<BMLBrowserEventMap>;
 export type BMLBrowserFontFace = {
-    source: string | BinaryData;
+    source: string | BufferSource;
     descriptors?: FontFaceDescriptors | undefined;
 };
 export type BMLBrowserFonts = {
@@ -137,6 +137,7 @@ export type BMLBrowserOptions = {
      * 動画像が配置されている部分が切り抜かれるためvideochangedイベントに合わせて動画を配置する
      */
     videoPlaneModeEnabled?: boolean;
+    tunnelPointerToVideoPlaneEnabled?: boolean;
     audioNodeProvider?: AudioNodeProvider;
     ip?: IP;
     inputApplication?: InputApplication;

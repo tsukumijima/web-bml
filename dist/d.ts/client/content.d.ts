@@ -4,6 +4,7 @@ import { ResponseMessage } from "../lib/ws_api";
 import { EventDispatcher, EventQueue } from "./event_queue";
 import { Interpreter } from "./interpreter/interpreter";
 import { BMLBrowserEventTarget, Indicator, InputApplication } from "./bml_browser";
+import { DRCSGlyphs } from "./drcs";
 export declare enum AribKeyCode {
     Up = 1,
     Down = 2,
@@ -52,17 +53,19 @@ export declare class Content {
     private indicator?;
     private fonts;
     private readonly videoPlaneModeEnabled;
+    private readonly tunnelPointerToVideoPlaneEnabled;
     private loaded;
     private readonly inputApplication?;
     private npt?;
     private uaStyle?;
     private readonly showErrorMessage;
-    constructor(bmlDocument: BML.BMLDocument, documentElement: HTMLElement, resources: Resources, eventQueue: EventQueue, eventDispatcher: EventDispatcher, interpreter: Interpreter, videoContainer: HTMLElement, bmlEventTarget: BMLBrowserEventTarget, indicator: Indicator | undefined, videoPlaneModeEnabled: boolean, inputApplication: InputApplication | undefined, showErrorMessage: ((title: string, message: string, code?: string) => void) | undefined);
+    constructor(bmlDocument: BML.BMLDocument, documentElement: HTMLElement, resources: Resources, eventQueue: EventQueue, eventDispatcher: EventDispatcher, interpreter: Interpreter, videoContainer: HTMLElement, bmlEventTarget: BMLBrowserEventTarget, indicator: Indicator | undefined, videoPlaneModeEnabled: boolean, tunnelPointerToVideoPlaneEnabled: boolean, inputApplication: InputApplication | undefined, showErrorMessage: ((title: string, message: string, code?: string) => void) | undefined);
     private decodeText;
     private _currentDateMode;
     set currentDateMode(timeMode: number);
     get currentDateMode(): number;
     private getBody;
+    private tunnelPointerToVideoPlane;
     private clipVideoPlane;
     private replaceTextCDATA;
     private loadDocumentToDOM;
@@ -95,6 +98,7 @@ export declare class Content {
     pcrBase?: number;
     getNPT90kHz(): number | null;
     onMessage(msg: ResponseMessage): void;
+    loadDRCS(glyphs: DRCSGlyphs[]): void;
     addDRCSFont(font: FontFace): void;
     get invisible(): boolean | undefined;
     private defaultShowErrorMessage;

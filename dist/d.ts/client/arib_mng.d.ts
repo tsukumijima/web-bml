@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { Buffer } from "buffer";
 export type MNGAnimation = {
     keyframes: Keyframe[];
@@ -7,5 +6,5 @@ export type MNGAnimation = {
     height: number;
     blobs: string[];
 };
-export declare function aribMNGToCSSAnimation(mng: Buffer, clut: number[][]): MNGAnimation | null;
+export declare function aribMNGToCSSAnimation(mng: Buffer<ArrayBuffer>, clut: number[][]): MNGAnimation | null;
 //# sourceMappingURL=arib_mng.d.ts.map

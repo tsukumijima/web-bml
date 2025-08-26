@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { Buffer } from "buffer";
 export type FieldValue = {
     type: "lws" | "quoted" | "tspecials" | "token";

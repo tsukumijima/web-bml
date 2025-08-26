@@ -1,12 +1,12 @@
-/// <reference types="node" />
 import { Buffer } from "buffer";
-type DRCSGlyph = {
+export type DRCSGlyph = {
+    fontId: FontId;
     width: number;
     height: number;
     depth: number;
     bitmap: number[];
 };
-type DRCSGlyphs = {
+export type DRCSGlyphs = {
     ku: number;
     ten: number;
     glyphs: DRCSGlyph[];
@@ -29,13 +29,17 @@ export declare class BinaryWriter {
     writeInt64BE(value: number): number;
     writeASCII(value: string): number;
     writeBuffer(value: Buffer): number;
-    getBuffer(): Buffer;
+    getBuffer(): Buffer<ArrayBuffer>;
     subarray(start?: number | undefined, end?: number | undefined): Buffer;
 }
 export declare function toTTF(glyphs: DRCSGlyphs[]): {
-    ttf: Buffer;
+    ttf: Buffer<ArrayBuffer>;
     unicodeCharacters: number[];
 };
+export declare enum FontId {
+    RoundGothic = 1,// 丸ゴシック
+    SquareGothic = 2,// 角ゴシック
+    BoldRoundGothic = 3
+}
 export declare function loadDRCS(drcs: Buffer, filterId?: number): DRCSGlyphs[];
-export {};
 //# sourceMappingURL=drcs.d.ts.map

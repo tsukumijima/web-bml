@@ -4,6 +4,7 @@ import { Resources } from "../resource";
 import { Interpreter } from "../interpreter/interpreter";
 import { AudioNodeProvider, BMLBrowserEventTarget, InputApplication } from "../bml_browser";
 import { ModuleListEntry } from "../../lib/ws_api";
+import { DRCSGlyph, DRCSGlyphs } from "../drcs";
 export declare namespace BML {
     type DOMString = string;
     export function nodeToBMLNode(node: globalThis.HTMLInputElement, ownerDocument: BMLDocument): BMLInputElement;
@@ -48,8 +49,9 @@ export declare namespace BML {
     }
     export class CharacterData extends Node {
         protected node: globalThis.CharacterData;
-        private readonly flowData?;
+        private flowData?;
         constructor(node: globalThis.CharacterData, ownerDocument: BMLDocument);
+        private internalAddFlowData;
         private getParentBlock;
         private createMarquee;
         private flowText;
@@ -86,6 +88,10 @@ export declare namespace BML {
         readonly inputApplication?: InputApplication;
         readonly setMainAudioStreamCallback?: (componentId: number, channelId?: number) => boolean;
         constructor(node: globalThis.HTMLElement, interpreter: Interpreter, eventQueue: EventQueue, resources: Resources, browserEventTarget: BMLBrowserEventTarget, audioNodeProvider: AudioNodeProvider, inputApplication: InputApplication | undefined, setMainAudioStreamCallback: ((componentId: number, channelId?: number) => boolean) | undefined);
+        private readonly _drcsGlyphs;
+        internalGetDRCS(fontFamily: string, fontSize: number, char: string): DRCSGlyph | undefined;
+        internalLoadDRCS(glyphs: DRCSGlyphs[]): void;
+        internalUnloadAllDRCS(): void;
         get documentElement(): HTMLElement;
         get currentFocus(): HTMLElement | null;
         get currentEvent(): BMLEvent | null;
