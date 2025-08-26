@@ -15,8 +15,9 @@ const invisibleVideoContainer = browserElement.querySelector(".arib-video-invisi
 // BML文書が入る要素
 const contentElement = browserElement.querySelector(".data-broadcasting-browser-content") as HTMLElement;
 // BML用フォント
-const roundGothic: BMLBrowserFontFace = { source: "url('KosugiMaru-Regular.ttf'), url('/rounded-mplus-1m-arib.ttf'), local('MS Gothic')" };
-const squareGothic: BMLBrowserFontFace = { source: "url('Kosugi-Regular.ttf'), url('/rounded-mplus-1m-arib.ttf'), local('MS Gothic')" };
+const roundGothic: BMLBrowserFontFace = { source: "url('/KosugiMaru-Regular.woff2'), local('MS Gothic')" };
+const boldRoundGothic: BMLBrowserFontFace = { source: "url('/KosugiMaru-Bold.woff2'), local('MS Gothic')" };
+const squareGothic: BMLBrowserFontFace = { source: "url('/Kosugi-Regular.woff2'), local('MS Gothic')" };
 
 // リモコン
 const remoteControl = new RemoteControl(document.getElementById("remote-control")!, browserElement.querySelector(".remote-control-receiving-status")!);
@@ -36,6 +37,7 @@ const bmlBrowser = new BMLBrowser({
     indicator: remoteControl,
     fonts: {
         roundGothic,
+        boldRoundGothic,
         squareGothic
     },
     epg,
@@ -124,7 +126,9 @@ async function delayAsync(msec: number): Promise<void> {
 
 async function openReadableStream(stream: ReadableStream<Uint8Array>) {
     const reader = stream.getReader();
-    const tsStream = decodeTS({ sendCallback: onMessage, parsePES: true });
+    const params = new URLSearchParams(location.search);
+    const serviceId = Number.parseInt(params.get("demultiplexServiceId") ?? "");
+    const tsStream = decodeTS({ sendCallback: onMessage, parsePES: true, serviceId: isNaN(serviceId) ? undefined : serviceId });
     tsStream.on("data", () => { });
     while (true) {
         const r = await reader.read();
@@ -136,8 +140,8 @@ async function openReadableStream(stream: ReadableStream<Uint8Array>) {
         const chunkSize = 188 * 100;
         for (let i = 0; i < chunk.length; i += chunkSize) {
             const prevPCR = pcr;
-            // @ts-ignore
-            tsStream._transform(chunk!.subarray(i, i + chunkSize), null, () => {});
+            // @ts-expect-error
+            tsStream._transform(chunk.subarray(i, i + chunkSize), null, () => {});
             const curPCR = pcr;
             const nowTime = performance.now();
             if (prevPCR == null) {
@@ -169,7 +173,7 @@ tsInput.addEventListener("change", () => {
         return;
     }
     tsInput.disabled = true;
-    const stream = file.stream() as unknown as ReadableStream<Uint8Array>;
+    const stream = file.stream();
     openReadableStream(stream);
 });
 if (tsUrlSubmit != null) {

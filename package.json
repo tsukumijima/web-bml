@@ -17,7 +17,7 @@
     }
   },
   "dependencies": {
-    "@tsukumijima/aribts": "github:tsukumijima/node-aribts#v1.5.1",
+    "@tsukumijima/aribts": "github:tsukumijima/node-aribts#v1.5.2",
     "arib-subtitle-timedmetadater": "^4.0.10",
     "aribb24.js": "^1.11.0",
     "buffer": "^6.0.3",
@@ -38,12 +38,13 @@
     "react-dom": "^18.2.0"
   },
   "scripts": {
-    "start": "node build/server/index.js",
-    "build": "webpack && tsc -p tsconfig.server.json",
+    "start": "node build/index.js",
+    "build": "webpack --mode=production && tsc -p tsconfig.server.json",
+    "watch:client": "webpack --mode=development -w",
     "dev": "ts-node server/index.ts"
   },
   "devDependencies": {
-    "@types/css": "^0.0.37",
+    "@types/css": "^0.0.38",
     "@types/koa": "^2.13.12",
     "@types/koa-router": "^7.4.8",
     "@types/node": "^18.19.4",
@@ -51,10 +52,10 @@
     "@types/react": "^18.2.46",
     "@types/react-dom": "^18.2.18",
     "@types/readable-stream": "^4.0.10",
-    "@types/ws": "^8.5.10",
+    "@types/ws": "^8.18.1",
     "ts-loader": "^9.5.1",
     "ts-node": "^10.9.2",
-    "typescript": "~5.3.3",
+    "typescript": "^5.9.2",
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4"
   }

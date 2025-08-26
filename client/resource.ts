@@ -40,7 +40,7 @@ export type CachedFileMetadata = {
 export type CachedFile = {
     contentLocation: string | null,
     contentType: MediaType,
-    data: Uint8Array,
+    data: Uint8Array<ArrayBuffer>,
     blobUrl: Map<any, CachedFileMetadata>,
 };
 
@@ -467,7 +467,7 @@ export class Resources {
                 for (const cb of callbacks) {
                     if (cb.filename == null) {
                         trace("async fetch done", str);
-                        cb.resolve(null);
+                        cb.resolve(cachedModule.files.get(null) ?? null);
                     } else {
                         const file = cachedModule.files.get(cb.filename);
                         trace("async fetch done", str, cb.filename);

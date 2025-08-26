@@ -21,7 +21,7 @@
 import { Buffer } from "buffer";
 import { romsoundData } from "./romsound_data";
 
-function playBuffer(destination: AudioNode, buf: Float32Array, sampleRate: number) {
+function playBuffer(destination: AudioNode, buf: Float32Array<ArrayBuffer>, sampleRate: number) {
     const buffer = destination.context.createBuffer(1, buf.length, sampleRate)
     buffer.copyToChannel(buf, 0)
     const source = destination.context.createBufferSource();
@@ -30,7 +30,7 @@ function playBuffer(destination: AudioNode, buf: Float32Array, sampleRate: numbe
     source.start(0);
 }
 
-const romSoundCache = new Map<number, { buffer: Float32Array, sampleRate: number }>();
+const romSoundCache = new Map<number, { buffer: Float32Array<ArrayBuffer>, sampleRate: number }>();
 
 export function playRomSound(soundId: number, destination: AudioNode) {
     let cache = romSoundCache.get(soundId);
