@@ -1,17 +1,21 @@
-FROM node:16-buster AS deps
+FROM node:22-trixie AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-FROM node:16-buster AS builder
+FROM node:22-trixie AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-ENV NODE_ENV production
+ENV NODE_ENV=production
 RUN npm run build
 
-FROM node:16-buster AS runner
-RUN apt-get update && apt-get install -y ffmpeg
+FROM node:22-trixie AS runner
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    rm -f /etc/apt/apt.conf.d/docker-clean && \
+    apt-get update && \
+    apt-get install -y ffmpeg
 WORKDIR /app
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/dist ./dist
@@ -21,6 +25,6 @@ COPY --from=deps /app/node_modules ./node_modules
 
 EXPOSE 23234
 
-ENV HOST 0.0.0.0
+ENV HOST=0.0.0.0
 
 CMD ["node", "build/server/index.js"]

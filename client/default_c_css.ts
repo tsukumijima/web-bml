@@ -162,7 +162,7 @@ textarea {
     resize: none;
 }
 
-object[web-bml-state="focus"], object[web-bml-state="active"], img[web-bml-state="focus"], img[web-bml-state="active"] {
+object[web-bml-state="focus"]>img, object[web-bml-state="active"]>img, img[web-bml-state="focus"], img[web-bml-state="active"] {
     outline: 1px blue dotted;
     outline-offset: -1px;
 }
