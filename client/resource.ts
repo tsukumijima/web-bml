@@ -1,9 +1,10 @@
 import { parseMediaTypeFromString, MediaType } from "../lib/entity_parser";
 import { ComponentPMT, ModuleListEntry, ProgramInfoMessage, ResponseMessage } from "../lib/ws_api";
 import { Indicator, IP } from "./bml_browser";
-import { getTrace, getError } from "./util/logging";
+import { getTrace, getLog, getError } from "./util/logging";
 
 const trace = getTrace("resource");
+const log = getLog("resource");
 const error = getError("resource");
 
 type Module = {
@@ -297,7 +298,7 @@ export class Resources {
                     // lockedByがlockModuleOnMemoryExならlockModuleOnMemoryExをキャンセル
                     if ((lockedBy == null && r.requestType != null) || (lockedBy != null && r.requestType === lockedBy)) {
                         requestCanceled = true;
-                        console.log(`${r.requestType} request was canceled due to unlockModules ${lockedBy ?? "lockModuleOnMemory+lockModuleOnMemoryEx"}`, moduleAndComponentToString(componentId, moduleId));
+                        log(`${r.requestType} request was canceled due to unlockModules ${lockedBy ?? "lockModuleOnMemory+lockModuleOnMemoryEx"}`, moduleAndComponentToString(componentId, moduleId));
                         return false;
                     }
                     return true;
@@ -345,7 +346,7 @@ export class Resources {
             moduleRequests.set(moduleId, moduleReq.filter((r) => {
                 if (r.requestType === lockedBy) {
                     requestCanceled = true;
-                    console.log(`${lockedBy} request was canceled due to unlockModule`, moduleAndComponentToString(componentId, moduleId));
+                    log(`${lockedBy} request was canceled due to unlockModule`, moduleAndComponentToString(componentId, moduleId));
                     return false;
                 }
                 return true;

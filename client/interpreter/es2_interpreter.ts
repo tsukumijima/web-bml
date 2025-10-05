@@ -10,7 +10,7 @@ import {
 } from "../../es2";
 import { Interpreter } from "./interpreter";
 import { Content } from "../content";
-import { getTrace } from "../util/trace";
+import { getTrace, getWarn, getError } from "../util/logging";
 import { Resources } from "../resource";
 import { BrowserAPI } from "../browser";
 import { EPG } from "../bml_browser";
@@ -20,6 +20,8 @@ import { defineBuiltinBinding, defineBrowserBinding, defineBinaryTableBinding } 
 // const domTrace = getTrace("js-interpreter.dom");
 // const eventTrace = getTrace("js-interpreter.event");
 const interpreterTrace = getTrace("js-interpreter");
+const interpreterWarn = getWarn("js-interpreter");
+const interpreterError = getError("js-interpreter");
 
 const LAUNCH_DOCUMENT_CALLED = { type: "launchDocumentCalled" } as const;
 
@@ -76,7 +78,7 @@ export class ES2Interpreter implements Interpreter {
         try {
             program = parse(script, { name: src ?? "anonymous", source: script });
         } catch (e) {
-            console.error("failed to parse script", src, e);
+            interpreterError("failed to parse script", src, e);
             return Promise.resolve(false);
         }
         return this.runScript(program);
@@ -115,7 +117,7 @@ export class ES2Interpreter implements Interpreter {
                             break;
                         } else if (typeof value === "object" && value != null && "type" in value && value.type === "interruption") {
                             // 中断したら50ms待って再開
-                            console.warn("script execution timeout");
+                            interpreterWarn("script execution timeout");
                             await new Promise((resolve) => {
                                 setTimeout(() => {
                                     resolve(true);
@@ -130,16 +132,16 @@ export class ES2Interpreter implements Interpreter {
                     }
                     interpreterTrace("RETURN RUN SCRIPT", exeNum, prevContext, this.content.context);
                 } catch (e) {
-                    console.error("unhandled error", exeNum, prevContext, this.content.context, e);
+                    interpreterError("unhandled error", exeNum, prevContext, this.content.context, e);
                 }
                 if (this.content.context !== prevContext) {
-                    console.error("context switched", this.content.context, prevContext);
+                    interpreterError("context switched", this.content.context, prevContext);
                     exit = true;
                 }
                 break;
             }
             if (!exit && this.content.context !== prevContext) {
-                console.error("context switched", this.content.context, prevContext);
+                interpreterError("context switched", this.content.context, prevContext);
                 exit = true;
             }
         } finally {

@@ -20,7 +20,7 @@ import {
 } from "../../es2";
 import * as BT from "../binary_table";
 import { Content } from "../content";
-import { getLog } from "../util/trace";
+import { getLog } from "../util/logging";
 import { Profile, Resources } from "../resource";
 import { BrowserAPI } from "../browser";
 import * as bmlDate from "../date";
@@ -435,7 +435,7 @@ export function defineBrowserBinding(context: Context, resources: Resources, bro
     }
 
     function* X_DPA_launchDocWithLink(documentName: string, transitionStyle: string | undefined) {
-        console.log("%X_DPA_launchDocWithLink", "font-size: 4em", documentName);
+        browserLog("%X_DPA_launchDocWithLink", "font-size: 4em", documentName);
         if (resources.profile !== Profile.TrProfileC) {
             yield LAUNCH_DOCUMENT_CALLED;
             return NaN;
