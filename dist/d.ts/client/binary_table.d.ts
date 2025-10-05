@@ -1,10 +1,10 @@
 import { TextDecodeFunction, TextEncodeFunction } from "./text";
-declare enum BinaryTableUnit {
+export declare enum BinaryTableUnit {
     Byte = "B",
     Bit = "b",
     Variable = "V"
 }
-declare enum BinaryTableType {
+export declare enum BinaryTableType {
     Boolean = "B",
     UnsignedInteger = "U",
     Integer = "I",
@@ -12,7 +12,7 @@ declare enum BinaryTableType {
     ZipCode = "Z",
     Pad = "P"
 }
-type BinaryTableField = {
+export type BinaryTableField = {
     unit: BinaryTableUnit;
     length: number;
     type: BinaryTableType;
@@ -36,5 +36,4 @@ export declare class BinaryTable {
     toArray(startRow: number, numRow: number): any[][] | null;
     search(startRow: number, ...args: any[]): number;
 }
-export {};
 //# sourceMappingURL=binary_table.d.ts.map

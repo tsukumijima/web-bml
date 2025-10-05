@@ -1,5 +1,5 @@
 import { EventQueue } from "../event_queue";
-import { BMLCSS2Properties } from "./BMLCSS2Properties";
+import { BMLCSS2Properties, BMLCSS2Properties as BMLCSS2Properties_ } from "./BMLCSS2Properties";
 import { Resources } from "../resource";
 import { Interpreter } from "../interpreter/interpreter";
 import { AudioNodeProvider, BMLBrowserEventTarget, InputApplication } from "../bml_browser";
@@ -26,6 +26,8 @@ export declare namespace BML {
     export function nodeToBMLNode(node: globalThis.HTMLParagraphElement, ownerDocument: BMLDocument): BMLParagraphElement;
     export function nodeToBMLNode(node: globalThis.HTMLDivElement, ownerDocument: BMLDocument): BMLDivElement;
     export function nodeToBMLNode(node: globalThis.HTMLHtmlElement, ownerDocument: BMLDocument): BMLBmlElement;
+    export function nodeToBMLNode(node: globalThis.HTMLPreElement, ownerDocument: BMLDocument): BMLPreElement;
+    export function nodeToBMLNode(node: globalThis.HTMLLinkElement, ownerDocument: BMLDocument): HTMLLinkElement;
     export function nodeToBMLNode(node: globalThis.HTMLElement, ownerDocument: BMLDocument): HTMLElement;
     export function nodeToBMLNode(node: globalThis.Element, ownerDocument: BMLDocument): Element;
     export function nodeToBMLNode(node: globalThis.CDATASection, ownerDocument: BMLDocument): CDATASection;
@@ -284,6 +286,13 @@ export declare namespace BML {
     }
     export class HTMLHeadElement extends HTMLElement {
     }
+    export class HTMLPreElement extends HTMLElement {
+    }
+    export class BMLPreElement extends HTMLPreElement {
+        get normalStyle(): BMLCSS2Properties;
+    }
+    export class HTMLLinkElement extends HTMLElement {
+    }
     export class BMLBeventElement extends HTMLElement {
     }
     export class BMLBeitemElement extends HTMLElement {
@@ -373,6 +382,7 @@ export declare namespace BML {
     export class DOMImplementation {
         hasFeature(feature: string, version: string): boolean;
     }
+    export const BMLCSS2Properties: typeof BMLCSS2Properties_;
     export {};
 }
 //# sourceMappingURL=DOM.d.ts.map
