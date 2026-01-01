@@ -572,6 +572,7 @@ export type InterpreterObject = {
     };
     properties: Map<string, Property>;
 };
+export declare function defaultPutProperty(ctx: Context, self: InterpreterObject, propertyName: string, value: Value, caller: Caller): void;
 export declare function putProperty(ctx: Context, self: InterpreterObject, propertyName: string, value: Value, caller: Caller): Generator<unknown, unknown>;
 export declare function isPrimitive(value: Value): value is PrimitiveValue;
 export declare function isObject(value: Value): value is InterpreterObject;

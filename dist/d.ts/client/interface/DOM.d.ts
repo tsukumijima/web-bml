@@ -114,6 +114,7 @@ export declare namespace BML {
         internalSetFocus(focus: boolean): void;
         internalSetActive(active: boolean): void;
         private applyStyle;
+        private applyDRCSStyle;
         protected getNormalStyle(): BMLCSS2Properties;
         protected getFocusStyle(): BMLCSS2Properties;
         protected getActiveStyle(): BMLCSS2Properties;
