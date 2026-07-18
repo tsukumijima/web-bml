@@ -581,6 +581,7 @@ type CallingInfo = {
     parent: CallingInfo | undefined;
     name: string;
     caller: Caller;
+    evalCode: boolean;
 };
 type Scope = {
     parent: Scope | undefined;

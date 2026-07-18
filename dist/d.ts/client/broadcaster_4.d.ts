@@ -210,6 +210,9 @@ export declare const broadcaster4: {
         "841": {
             broadcasterId: number;
         };
+        "849": {
+            broadcasterId: number;
+        };
         "929": {
             broadcasterId: number;
         };

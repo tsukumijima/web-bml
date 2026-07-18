@@ -33,7 +33,7 @@ export declare class BinaryTable {
     close(): number;
     toNumber(row: number, column: number): number;
     toString(row: number, column: number): string | null;
-    toArray(startRow: number, numRow: number): any[][] | null;
+    toArray(startRow: number, numRow: number): (any[] | null)[] | null;
     search(startRow: number, ...args: any[]): number;
 }
 //# sourceMappingURL=binary_table.d.ts.map
