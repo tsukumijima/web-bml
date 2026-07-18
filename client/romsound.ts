@@ -32,24 +32,22 @@ function playBuffer(destination: AudioNode, buf: Float32Array<ArrayBuffer>, samp
 
 const romSoundCache = new Map<number, { buffer: Float32Array<ArrayBuffer>, sampleRate: number }>();
 
-export function playRomSound(soundId: number, destination: AudioNode) {
+export function playRomSound(soundId: number, destination: AudioNode): boolean {
     let cache = romSoundCache.get(soundId);
     if (cache == null) {
         const data = romsoundData[soundId];
-        if (data != null) {
-            const buffer = Buffer.from(data, "base64").buffer;
-            destination.context.decodeAudioData(buffer).then((audioBuffer) => {
-                const cache = { buffer: audioBuffer.getChannelData(0), sampleRate: audioBuffer.sampleRate };
-                romSoundCache.set(soundId, cache);
-                playBuffer(destination, cache.buffer, cache.sampleRate);
-            });
+        // 受信機に搭載していない音声は再生失敗として通知する
+        if (data == null) {
+            return false;
         }
-        if (cache != null) {
+        const buffer = Buffer.from(data, "base64").buffer;
+        destination.context.decodeAudioData(buffer).then((audioBuffer) => {
+            const cache = { buffer: audioBuffer.getChannelData(0), sampleRate: audioBuffer.sampleRate };
             romSoundCache.set(soundId, cache);
-        }
+            playBuffer(destination, cache.buffer, cache.sampleRate);
+        });
+        return true;
     }
-    if (cache != null) {
-        playBuffer(destination, cache.buffer, cache.sampleRate);
-        return;
-    }
+    playBuffer(destination, cache.buffer, cache.sampleRate);
+    return true;
 }
