@@ -1,5 +1,5 @@
 // /documents/nvram.md参照
-import { parseBinaryStructure, readBinaryFields, writeBinaryFields } from "./binary_table";
+import { BinaryTableType, parseBinaryStructure, readBinaryFields, writeBinaryFields } from "./binary_table";
 import { BroadcasterDatabase } from "./broadcaster_database";
 import { Resources } from "./resource";
 import { getTextDecoder, getTextEncoder } from "./text";
@@ -531,8 +531,14 @@ export class NVRAM {
         if (!a) {
             return null;
         }
-        let [result, _] = readBinaryFields(a, fields, getTextDecoder(this.resources.profile));
-        return result;
+        try {
+            const [result] = readBinaryFields(a, fields, getTextDecoder(this.resources.profile));
+            return result;
+        } catch (caughtError) {
+            // 不正な構造や保存データは BML 側へ例外を漏らさず null で通知する
+            error("readPersistentArray: failed to decode data", filename, caughtError);
+            return null;
+        }
     }
 
     public writePersistentArray(filename: string, structure: string, data: any[], period?: Date, force?: boolean): number {
@@ -543,12 +549,19 @@ export class NVRAM {
         if (!fields) {
             return NaN;
         }
-        if (fields.length > data.length) {
-            error("writePersistentArray: fields.length > data.length");
+        const dataFieldCount = fields.filter(field => field.type !== BinaryTableType.Pad).length;
+        if (dataFieldCount > data.length) {
+            error("writePersistentArray: dataFieldCount > data.length");
             return NaN;
         }
-        let bin = writeBinaryFields(data, fields, getTextEncoder(this.resources.profile));
-        return this.writeNVRAM(filename, bin, force ?? false);
+        try {
+            const bin = writeBinaryFields(data, fields, getTextEncoder(this.resources.profile));
+            return this.writeNVRAM(filename, bin, force ?? false);
+        } catch (caughtError) {
+            // エンコードや保存の失敗は BML 側へ例外を漏らさず NaN で通知する
+            error("writePersistentArray: failed to encode or save data", filename, caughtError);
+            return NaN;
+        }
     }
 
     // key: <original_network_id>.<broadcaster_id>
@@ -610,8 +623,14 @@ export class NVRAM {
         if (!a) {
             return null;
         }
-        let [result, _] = readBinaryFields(a, fields, getTextDecoder(this.resources.profile));
-        return result;
+        try {
+            const [result] = readBinaryFields(a, fields, getTextDecoder(this.resources.profile));
+            return result;
+        } catch (caughtError) {
+            // 不正な構造や保存データは BML 側へ例外を漏らさず null で通知する
+            error("readPersistentArrayWithAccessCheck: failed to decode data", filename, caughtError);
+            return null;
+        }
     }
 
     public writePersistentArrayWithAccessCheck(filename: string, structure: string, data: any[], period?: Date): number {
@@ -622,12 +641,19 @@ export class NVRAM {
         if (!fields) {
             return NaN;
         }
-        if (fields.length > data.length) {
-            error("writePersistentArrayWithAccessCheck: fields.length > data.length");
+        const dataFieldCount = fields.filter(field => field.type !== BinaryTableType.Pad).length;
+        if (dataFieldCount > data.length) {
+            error("writePersistentArrayWithAccessCheck: dataFieldCount > data.length");
             return NaN;
         }
-        let bin = writeBinaryFields(data, fields, getTextEncoder(this.resources.profile));
-        return this.writeNVRAM(filename, bin, false);
+        try {
+            const bin = writeBinaryFields(data, fields, getTextEncoder(this.resources.profile));
+            return this.writeNVRAM(filename, bin, false);
+        } catch (caughtError) {
+            // エンコードや保存の失敗は BML 側へ例外を漏らさず NaN で通知する
+            error("writePersistentArrayWithAccessCheck: failed to encode or save data", filename, caughtError);
+            return NaN;
+        }
     }
 
     public checkAccessInfoOfPersistentArray(uri: string): number {

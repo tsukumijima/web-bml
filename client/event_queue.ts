@@ -213,8 +213,9 @@ export class EventDispatcher {
                 if (refChannelId == null && prevComponentId === componentId) {
                     continue;
                 }
-                const unselected = refComponentId === prevComponentId && (prevChannelId ?? refChannelId) === (prevChannelId ?? null);
-                selected = refComponentId === componentId && (channelId ?? refChannelId) === (channelId ?? null);
+                // es_ref のチャンネル ID が変更前または変更後の音声と一致する場合だけ通知する
+                const unselected = refComponentId === prevComponentId && (refChannelId == null || refChannelId === prevChannelId);
+                selected = refComponentId === componentId && (refChannelId == null || refChannelId === channelId);
                 if (!selected && !unselected) {
                     continue;
                 }
