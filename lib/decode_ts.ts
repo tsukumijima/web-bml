@@ -429,8 +429,8 @@ export function decodeTS(options: DecodeTSOptions): TsStream {
         const short_event_descriptor = services.filter((data: { [key: string]: any }) => data.descriptor_tag === 0x4D);
         const event_name_char = new TsChar(short_event_descriptor[0].event_name_char).decode();
         const serviceId = data.services[0].service_id;
-        let originalNetworkId = data.transmission_info[1].network_id;
-        let transportStreamId = null;
+        let originalNetworkId: number = data.transmission_info[1].network_id;
+        let transportStreamId: number | null = null;
 
         let tot_descriptor;
         const transmission_tot = data.transmission_info.filter((data: { [key: string]: any }) => data.descriptor_tag === 0xC3);
@@ -450,15 +450,22 @@ export function decodeTS(options: DecodeTSOptions): TsStream {
         }
 
         const event_group_descriptor = services.filter((data: { [key: string]: any }) => data.descriptor_tag === 0xD6);
-        let event_Id = null;
+        let eventId: number | null = null;
         if (event_group_descriptor.length > 0) {
             if (event_group_descriptor[0].events.filter((data: { [key: string]: any }) => data.service_id === serviceId).length > 0) {
-                event_Id = event_group_descriptor[0].events.filter((data: { [key: string]: any }) => data.service_id === serviceId)[0].event_id;
+                eventId = event_group_descriptor[0].events.filter((data: { [key: string]: any }) => data.service_id === serviceId)[0].event_id;
             }
         }
 
-        const broadcast_id_descriptor = services.find((data: any) => data.descriptor_tag === 0x85);
-        if (broadcast_id_descriptor) {
+        // パーシャル TS では PAT/NIT が無いことがあるので、Broadcast ID 記述子 (0x85) から
+        // original_network_id / transport_stream_id / event_id を補完する
+        const broadcast_id_descriptor = services.find((data: { [key: string]: any }) => data.descriptor_tag === 0x85) as {
+            original_network_id: number,
+            transport_stream_id: number,
+            event_id: number,
+            broadcaster_id: number,
+        } | undefined;
+        if (broadcast_id_descriptor != null) {
             originalNetworkId = broadcast_id_descriptor.original_network_id;
             transportStreamId = broadcast_id_descriptor.transport_stream_id;
             eventId = broadcast_id_descriptor.event_id;
