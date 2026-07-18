@@ -17,7 +17,7 @@
     }
   },
   "dependencies": {
-    "@tsukumijima/aribts": "github:tsukumijima/node-aribts#v1.5.2",
+    "@tsukumijima/aribts": "github:tsukumijima/node-aribts#v1.5.3",
     "arib-subtitle-timedmetadater": "^4.0.10",
     "aribb24.js": "^1.11.0",
     "buffer": "^6.0.3",
