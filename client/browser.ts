@@ -1327,7 +1327,8 @@ export class BrowserAPI {
                         this.setUreg(i, "");
                     }
                 }
-                this.setUreg(0, "0x" + msg.serviceId.toString(16).padStart(4));
+                // TR-B14 第二分冊 5.12.6.1: service_id を "0xXXXX" 形式で書く
+                this.setUreg(0, "0x" + msg.serviceId.toString(16).padStart(4, "0"));
             }
         }
     }
