@@ -784,9 +784,8 @@ export class BrowserAPI {
             if (Number.isNaN(time)) {
                 return base;
             }
-            if (unit == 0) {
-                return new Date(base.getTime() + time);
-            } else if (unit == 1) {
+            // STD-B24 第二編 7.6.14: unit が有効値以外なら unit を 0 (ミリ秒) として扱う
+            if (unit == 1) {
                 return new Date(base.getTime() + (time * 1000));
             } else if (unit == 2) {
                 return new Date(base.getTime() + (time * 1000 * 60));
@@ -796,13 +795,15 @@ export class BrowserAPI {
                 return new Date(base.getTime() + (time * 1000 * 60 * 60 * 24));
             } else if (unit == 5) {
                 return new Date(base.getTime() + (time * 1000 * 60 * 60 * 24 * 7));
+            } else {
+                return new Date(base.getTime() + time);
             }
-            return NaN;
         },
         formatNumber(value: number): string | null {
-            const number = Number(value);
+            let number = Number(value);
+            // STD-B24 第二編 7.6.14: value が有効値以外なら value を 0 として扱う
             if (Number.isNaN(number)) {
-                return null;
+                number = 0;
             }
             return number.toLocaleString("en-US");
         },
