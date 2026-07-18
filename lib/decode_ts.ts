@@ -429,6 +429,8 @@ export function decodeTS(options: DecodeTSOptions): TsStream {
         const short_event_descriptor = services.filter((data: { [key: string]: any }) => data.descriptor_tag === 0x4D);
         const event_name_char = new TsChar(short_event_descriptor[0].event_name_char).decode();
         const serviceId = data.services[0].service_id;
+        let originalNetworkId = data.transmission_info[1].network_id;
+        let transportStreamId = null;
 
         let tot_descriptor;
         const transmission_tot = data.transmission_info.filter((data: { [key: string]: any }) => data.descriptor_tag === 0xC3);
@@ -455,12 +457,19 @@ export function decodeTS(options: DecodeTSOptions): TsStream {
             }
         }
 
+        const broadcast_id_descriptor = services.find((data: any) => data.descriptor_tag === 0x85);
+        if (broadcast_id_descriptor) {
+            originalNetworkId = broadcast_id_descriptor.original_network_id;
+            transportStreamId = broadcast_id_descriptor.transport_stream_id;
+            eventId = broadcast_id_descriptor.event_id;
+        }
+
         currentProgramInfo = {
             type: "programInfo",
-            eventId: event_Id,
-            transportStreamId: null,
-            originalNetworkId: data.transmission_info[1].network_id,
-            serviceId: serviceId,
+            eventId,
+            transportStreamId,
+            originalNetworkId,
+            serviceId,
             eventName: event_name_char,
             startTimeUnixMillis: event_start_time,
             durationSeconds: null,

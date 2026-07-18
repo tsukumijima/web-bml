@@ -22,7 +22,7 @@
     "aribb24.js": "^1.11.0",
     "buffer": "^6.0.3",
     "crc-32": "^1.2.2",
-    "css": "github:otya128/reworkcss-css#b29fc79faf40c8164b20a74ca818c28fab19cf71",
+    "css": "github:otya128/reworkcss-css#v3.0.1",
     "dotenv": "^16.3.1",
     "fast-xml-parser": "^4.3.2",
     "hls.js": "^1.4.14",
