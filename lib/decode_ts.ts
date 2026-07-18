@@ -432,21 +432,28 @@ export function decodeTS(options: DecodeTSOptions): TsStream {
         let originalNetworkId: number = data.transmission_info[1].network_id;
         let transportStreamId: number | null = null;
 
-        let tot_descriptor;
+        // TR-B15 第二部 6.2.4: パーシャル TS タイム記述子 (0xC3) は
+        // 1st loop (transmission_info) に現在時刻、2nd loop (service) に番組時刻を置く
+        // 推奨は 1st に JST、2nd に番組時刻 (JST なし)。片方だけの運用もあり得る
         const transmission_tot = data.transmission_info.filter((data: { [key: string]: any }) => data.descriptor_tag === 0xC3);
         const service_tot = services.filter((data: { [key: string]: any }) => data.descriptor_tag === 0xC3);
-        let jst_time = 0;
-        let event_start_time = 0;
 
-        if (transmission_tot.length > 0) {
-            tot_descriptor = transmission_tot;
+        // JST は jst_time_flag === 1 のときだけ有効なので、フラグ付きを 1st → 2nd の順で探す
+        let jst_time: number | null = null;
+        for (const descriptor of [...transmission_tot, ...service_tot]) {
+            if (descriptor.jst_time_flag === 1 && descriptor.jst_time != null) {
+                jst_time = new TsDate(descriptor.jst_time).decode().getTime();
+                break;
+            }
         }
-        else if (service_tot.length > 0) {
-            tot_descriptor = service_tot;
-        }
-        if (tot_descriptor) {
-            jst_time = new TsDate(tot_descriptor[0].jst_time).decode().getTime();
-            event_start_time = new TsDate(service_tot[0].event_start_time).decode().getTime();
+
+        // event_start_time は 2nd loop でのみ有効 (1st loop では 0xFFFFFFFFFF で無効)
+        let event_start_time: number | null = null;
+        if (service_tot.length > 0) {
+            const eventStartTimeBytes: Buffer | undefined = service_tot[0].event_start_time;
+            if (eventStartTimeBytes != null && !eventStartTimeBytes.every((byte: number) => byte === 0xff)) {
+                event_start_time = new TsDate(eventStartTimeBytes).decode().getTime();
+            }
         }
 
         const event_group_descriptor = services.filter((data: { [key: string]: any }) => data.descriptor_tag === 0xD6);
@@ -485,7 +492,8 @@ export function decodeTS(options: DecodeTSOptions): TsStream {
         };
         send(currentProgramInfo);
 
-        if (currentTime !== jst_time) {
+        // 0xC3 が無い / JST が載っていない SIT では時刻を送らない (epoch を送らない)
+        if (jst_time != null && currentTime !== jst_time) {
             currentTime = jst_time;
             send({
                 type: "currentTime",

@@ -281,9 +281,9 @@ export class JSInterpreter implements Interpreter {
                 callback(NaN, LAUNCH_DOCUMENT_CALLED);
                 return;
             }
-            // 絶対URIを使用すること
-            // TR-B14 第三分冊 8.3.10.2
-            if (!documentName.startsWith("http://") && documentName.startsWith("https://")) {
+            // 絶対 URI を使用すること (TR-B14 第三分冊 8.3.10.2)
+            // http: / https: のいずれも可 (同 8.3.10.3)
+            if (!documentName.startsWith("http://") && !documentName.startsWith("https://")) {
                 callback(NaN, LAUNCH_DOCUMENT_CALLED);
                 return;
             }
