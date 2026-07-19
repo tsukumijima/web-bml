@@ -244,41 +244,6 @@ export function defineBuiltinBinding(context: Context, resources: Resources) {
             ),
         });
     }
-    datePrototype.properties.set("getYear", {
-        readOnly: false,
-        dontEnum: true,
-        dontDelete: false,
-        value: newNativeFunction(
-            context.realm.intrinsics.FunctionPrototype,
-            function* datePrototypeGetYear(ctx, self, _args, caller) {
-                const value = getDateObjectValue(self);
-                if (value == null) {
-                    throw new InterpreterTypeError(`Date.prototype.getYear: this must be Date object`, ctx, caller);
-                }
-                return new Date(value).getFullYear() - 1900;
-            },
-            0,
-            "getYear"
-        ),
-    });
-    datePrototype.properties.set("setYear", {
-        readOnly: false,
-        dontEnum: true,
-        dontDelete: false,
-        value: newNativeFunction(
-            context.realm.intrinsics.FunctionPrototype,
-            function* datePrototypeSetSeconds(ctx, self, args, caller) {
-                const value = getDateObjectValue(self);
-                if (value == null) {
-                    throw new InterpreterTypeError(`Date.prototype.setYear: this must be Date object`, ctx, caller);
-                }
-                const year = yield* toNumber(ctx, args[0], caller);
-                return new Date(value).setFullYear(year);
-            },
-            2,
-            "setYear"
-        ),
-    });
     date.properties.set("prototype", {
         readOnly: true,
         dontEnum: true,
@@ -298,7 +263,7 @@ export function defineBuiltinBinding(context: Context, resources: Resources) {
                 }
                 return bmlDate.toString.call(new Date(value));
             },
-            1,
+            0,
             "toString"
         ),
     });

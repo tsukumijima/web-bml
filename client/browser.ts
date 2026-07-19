@@ -1330,7 +1330,13 @@ export class BrowserAPI {
                     }
                 }
                 // TR-B14 第二分冊 5.12.6.1: service_id を "0xXXXX" 形式で書く
-                this.setUreg(0, "0x" + msg.serviceId.toString(16).padStart(4, "0"));
+                this.serviceId = msg.serviceId;
+                // C プロファイルでは Ureg[0] に service_id を設定しない
+                if (this.resources.profile !== resource.Profile.TrProfileC) {
+                    this.setUreg(0, "0x" + msg.serviceId.toString(16).padStart(4, "0"));
+                } else {
+                    this.setUreg(0, "");
+                }
             }
         }
     }

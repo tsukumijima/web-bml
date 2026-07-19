@@ -330,10 +330,7 @@ export namespace BML {
             const marquee = document.createElement("marquee");
             marquee.behavior = style;
             if (Number.isFinite(loop)) {
-                if (loop !== 0) {
-                } else {
-                    marquee.loop = loop;
-                }
+                marquee.loop = loop;
             }
             // dirはrtl固定
             const speed = computedStyle.getPropertyValue("---wap-marquee-speed").trim().toLowerCase();
@@ -993,13 +990,13 @@ export namespace BML {
             this.ownerDocument.inputApplication?.launch({
                 characterType: ctype,
                 allowedCharacters: allowed,
-                maxLength: this.maxLength,
+                maxLength,
                 value: this.value,
                 inputMode: this.type === "password" ? "password" : "text",
                 multiline: true,
                 callback: (value) => {
                     value = getTextDecoder(this.ownerDocument.resources.profile)(getTextEncoder(this.ownerDocument.resources.profile)(value));
-                    value = value.replace(/[\n\r]/g, "").substring(0, this.maxLength);
+                    value = value.replace(/[\n\r]/g, "").substring(0, maxLength);
                     if (allowed != null) {
                         value = value.split("").filter(x => {
                             return allowed.includes(x);
@@ -1416,12 +1413,12 @@ export namespace BML {
         }
 
         public get streamStatus(): DOMString {
+            const value = this.node.getAttribute("streamstatus");
             if (this.animation != null) {
-                if (this.animation.playState === "finished" && this.streamStatus !== "pause") {
+                if (this.animation.playState === "finished" && value !== "pause") {
                     this.streamStatus = "pause";
                 }
             }
-            const value = this.node.getAttribute("streamstatus");
             if (value == null) {
                 const type = this.type.toLowerCase();
                 // stopを取りうる場合初期値はstop (STD-B24 第二分冊 (2/2) 付属2 4.8.5.2 注2)

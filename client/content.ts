@@ -907,7 +907,11 @@ export class Content {
                 const second = Number.parseInt(timeValue.substring(12, 14));
                 const date = new Date(year, month - 1, day, hour, minute, second);
                 const time = date.getTime();
-                if (this.resources.currentTimeUnixMillis != null && time <= this.resources.currentTimeUnixMillis) {
+                // 放送日時は JST 固定なので、実行環境のタイムゾーンを経由して UTC 時刻へ変換する
+                const tz = date.getTimezoneOffset() * 60 * 1000;
+                const jst = 9 * 60 * 60 * 1000;
+                const jstTime = time - tz - jst;
+                if (this.resources.currentTimeUnixMillis != null && jstTime <= this.resources.currentTimeUnixMillis) {
                     beitem.internalTimerFired = true;
                     this.eventDispatcher.dispatchTimerFiredEvent(0, elem);
                 }
@@ -1265,7 +1269,7 @@ export class Content {
             if (usedKeyList.length && usedKeyList[0] === "none") {
                 return false;
             }
-            const keyGroup = keyCodeToKeyGroup.get(keyCode);
+            const keyGroup = (this.resources.profile === Profile.TrProfileC ? keyCodeToKeyGroupCProfile : keyCodeToKeyGroup).get(keyCode);
             if (keyGroup == null) {
                 return false;
             }
