@@ -1083,7 +1083,7 @@ export class BrowserAPI {
             throw new Error("unreachable!!");
         },
         quitDocument: (): number => {
-            console.log("%cquitDocument", "font-size: 4em");
+            log("%cquitDocument", "font-size: 1.5em");
             this.content.quitDocument();
             this.interpreter.destroyStack();
             throw new Error("unreachable!!");

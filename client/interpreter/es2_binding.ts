@@ -408,7 +408,7 @@ export function defineBrowserBinding(context: Context, resources: Resources, bro
     }
 
     function* X_DPA_launchDocWithLink(documentName: string, transitionStyle: string | undefined) {
-        browserLog("%X_DPA_launchDocWithLink", "font-size: 4em", documentName);
+        browserLog("%X_DPA_launchDocWithLink", "font-size: 1.5em", documentName);
         if (resources.profile !== Profile.TrProfileC) {
             yield LAUNCH_DOCUMENT_CALLED;
             return NaN;
@@ -432,7 +432,7 @@ export function defineBrowserBinding(context: Context, resources: Resources, bro
     }
 
     function* epgTune(service_ref: string) {
-        browserLog("%cepgTune", "font-size: 4em", service_ref);
+        browserLog("%cepgTune", "font-size: 1.5em", service_ref);
         const { originalNetworkId, transportStreamId, serviceId } = resources.parseServiceReference(service_ref);
         if (originalNetworkId == null || transportStreamId == null || serviceId == null) {
             yield LAUNCH_DOCUMENT_CALLED;
