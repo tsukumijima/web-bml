@@ -3,23 +3,17 @@ import { Resources, CachedFile, Profile, CachedFileMetadata } from "./resource";
 import { defaultCLUT } from "./default_clut";
 import { readCLUT } from "./clut";
 import { transpileCSS } from "./transpile_css";
-import { Buffer } from "buffer";
 import { BML } from "./interface/DOM";
 import { bmlToXHTMLFXP } from "./bml_to_xhtml";
-import { NPTReference, ResponseMessage } from "../lib/ws_api";
+import { NPTReference, ResponseMessage } from "../server/ws_api";
 import { EventDispatcher, EventQueue } from "./event_queue";
 import { Interpreter } from "./interpreter/interpreter";
-import { BMLBrowserEventTarget, Indicator, InputApplication, KeyGroup, BMLBrowserProfile } from "./bml_browser";
+import { BMLBrowserEventTarget, Indicator, InputApplication, KeyGroup, Profile as BMLBrowserProfile } from "./bml_browser";
 import { convertJPEG } from "./arib_jpeg";
 import { getTextDecoder } from "./text";
-import { getTrace, getLog, getWarn, getError } from "./util/logging";
-
-const trace = getTrace("content");
-const log = getLog("content");
-const warn = getWarn("content");
-const error = getError("content");
-
 import { DRCSGlyphs } from "./drcs";
+import { type Logger } from "./util/logger";
+
 import { defaultCSS } from "./default_css";
 import { defaultCProfileCSS } from "./default_c_css";
 
@@ -220,6 +214,7 @@ export class Content {
     private npt?: NPT;
     private uaStyle?: HTMLStyleElement;
     private readonly showErrorMessage: (title: string, message: string, code?: string) => void;
+    private readonly logger: Logger;
     public constructor(
         bmlDocument: BML.BMLDocument,
         documentElement: HTMLElement,
@@ -234,6 +229,7 @@ export class Content {
         tunnelPointerToVideoPlaneEnabled: boolean,
         inputApplication: InputApplication | undefined,
         showErrorMessage: ((title: string, message: string, code?: string) => void) | undefined,
+        logger: Logger,
     ) {
         this.bmlDocument = bmlDocument;
         this.documentElement = documentElement;
@@ -248,6 +244,7 @@ export class Content {
         this.tunnelPointerToVideoPlaneEnabled = tunnelPointerToVideoPlaneEnabled;
         this.inputApplication = inputApplication;
         this.showErrorMessage = showErrorMessage ?? this.defaultShowErrorMessage.bind(this);
+        this.logger = logger;
 
         this.documentElement.addEventListener("keydown", (event) => {
             if (event.altKey || event.ctrlKey || event.metaKey) {
@@ -274,7 +271,7 @@ export class Content {
 
         this.resources.addEventListener("dataeventchanged", async (event) => {
             const { component, returnToEntryFlag } = event.detail;
-            trace("DataEventChanged", event.detail);
+            this.logger.debug(`${this.logger.prefix}DataEventChanged`, event.detail);
             const { moduleId, componentId } = this.resources.parseURLEx(this.resources.activeDocument);
             if (moduleId == null || componentId == null) {
                 return;
@@ -315,7 +312,7 @@ export class Content {
                         // 引き戻しフラグによるエントリコンポーネントへの遷移の場合lockModuleOnMemoryでロックしたモジュールのロックが解除される TR-B14 第二分冊 表5-11
                         this.resources.unlockModules("lockModuleOnMemory");
                     }
-                    error("launch startup (DataEventChanged)");
+                    this.logger.error(`${this.logger.prefix}launch startup (DataEventChanged)`);
                     this.launchStartup();
                     return true;
                 }
@@ -378,7 +375,7 @@ export class Content {
                     this.exitDocument();
                     return;
                 }
-                error("PID changed", prevPID, currentPID, prevEntryPID, currentEntryPID);
+                this.logger.error(`${this.logger.prefix}PID changed`, prevPID, currentPID, prevEntryPID, currentEntryPID);
                 this.eventQueue.queueGlobalAsyncEvent(async () => {
                     this.resources.unlockModules();
                     this.resources.clearCache();
@@ -653,7 +650,7 @@ export class Content {
             });
             if (await this.eventQueue.executeEventHandler(onunload)) {
                 // readPersistentArray writePersistentArray unlockModuleOnMemoryEx unlockAllModulesOnMemoryしか呼び出せないので終了したらおかしい
-                error("onunload");
+                this.logger.error(`${this.logger.prefix}onunload`);
                 return true;
             }
             this.eventDispatcher.resetCurrentEvent();
@@ -852,7 +849,7 @@ export class Content {
             const body = this.getBody();
             const onload = body?.getAttribute("arib-onload");
             if (onload != null) {
-                trace("START ONLOAD");
+                this.logger.debug(`${this.logger.prefix}START ONLOAD`);
                 this.eventDispatcher.setCurrentEvent({
                     target: body,
                     type: "load",
@@ -861,7 +858,7 @@ export class Content {
                     return true;
                 }
                 this.eventDispatcher.resetCurrentEvent();
-                trace("END ONLOAD");
+                this.logger.debug(`${this.logger.prefix}END ONLOAD`);
             }
             for (const beitem of this.documentElement.querySelectorAll("beitem[subscribe=\"subscribe\"]")) {
                 const bmlBeitem = BML.nodeToBMLNode(beitem, this.bmlDocument) as BML.BMLBeitemElement;
@@ -872,11 +869,11 @@ export class Content {
                 this.eventQueue.unlockSyncEventQueue();
             }
         }
-        trace("START PROC EVQ");
+        this.logger.debug(`${this.logger.prefix}START PROC EVQ`);
         if (await this.eventQueue.processEventQueue()) {
             return true;
         }
-        trace("END PROC EVQ");
+        this.logger.debug(`${this.logger.prefix}END PROC EVQ`);
         if (this.tunnelPointerToVideoPlaneEnabled) {
             this.tunnelPointerToVideoPlane();
         }
@@ -955,7 +952,7 @@ export class Content {
 
     private async launchDocumentAsync(documentName: string, options?: LaunchDocumentOptions) {
         const withLink = options?.withLink ?? false;
-        log(`%claunchDocument(${documentName})`, "font-size: 1.5em");
+        this.logger.log(`${this.logger.prefix}%claunchDocument`, "font-size: 1.5em", documentName);
         this.eventQueue.discard();
         const { component, module, filename } = this.resources.parseURL(documentName);
         const componentId = Number.parseInt(component ?? "", 16);
@@ -974,13 +971,13 @@ export class Content {
                     // > 受信機が非リンクを搭載していない場合、再選局相当の動作を行なう、または、遷移を行わずにリンク状態を継続する
                     // C 8.3.11.4 受信機の動作失敗時のガイドライン
                     // > ベースURIディレクトリに合致しないURIが指定された場合は、データ放送ブラウザは失敗動作とし、受信機はエラーメッセージを表示する
-                    error("base URI directory violation");
+                    this.logger.error(`${this.logger.prefix}base URI directory violation`);
                     await this.fail("エラー", "ベースURIディレクトリエラー", "E402");
                     return NaN;
                 }
                 normalizedDocument = new URL(documentName, this.resources.activeDocument).toString();
             } else {
-                error("failed to fetch document", documentName);
+                this.logger.error(`${this.logger.prefix}failed to fetch document`, documentName);
                 await this.quitDocument();
                 return NaN;
             }
@@ -996,13 +993,13 @@ export class Content {
             if (normalizedDocument.startsWith("http")) {
                 this.fail("ネットワークエラー", "文書の取得に失敗しました", "E400");
             }
-            error("NOT FOUND");
+            this.logger.error(`${this.logger.prefix}NOT FOUND`);
             await this.quitDocument();
             return NaN;
         }
         const ad = this.resources.activeDocument;
         await this.loadDocument(res, normalizedDocument);
-        trace("return ", ad, documentName);
+        this.logger.debug(`${this.logger.prefix}return `, ad, documentName);
         return NaN;
     }
 
@@ -1105,7 +1102,7 @@ export class Content {
                 const elem = this.documentElement.querySelector(`[accesskey="${accessKey}"]`) as HTMLElement;
                 if (elem != null && this.isFocusable(elem)) {
                     this.focusHelper(elem);
-                    warn("accesskey is half implemented.");
+                    this.logger.warn(`${this.logger.prefix}accesskey is half implemented.`);
                     // [6] 疑似的にkeyup割り込み事象が発生 keyCode = アクセスキー
                     const onkeyup = elem.getAttribute("onkeyup");
                     if (onkeyup != null) {
@@ -1324,7 +1321,7 @@ export class Content {
         const res = await this.resources.fetchResourceAsync(clutUrl);
         let clut = defaultCLUT;
         if (res?.data) {
-            clut = readCLUT(Buffer.from(res.data));
+            clut = readCLUT(res.data, this.logger);
         }
         return this.clutToDecls(clut);
     }
@@ -1345,7 +1342,7 @@ export class Content {
             res.blobUrl.set("BT.709", bt709);
             return bt709;
         } catch (e) {
-            error("failed to decode image", url, e);
+            this.logger.error(`${this.logger.prefix}failed to decode image`, url, e);
             return undefined;
         }
     }
@@ -1422,7 +1419,7 @@ export class Content {
                             scaleDenominator: nptReference.scaleDenominator,
                             scaleNumerator: nptReference.scaleNumerator,
                         };
-                        trace("NPTReferred", this.npt);
+                        this.logger.debug(`${this.logger.prefix}NPTReferred`, this.npt);
                     }
                     const nptReferred = this.documentElement.querySelectorAll("beitem[type=\"NPTReferred\"][subscribe=\"subscribe\"]");
                     for (const beitemNative of Array.from(nptReferred)) {
@@ -1526,7 +1523,7 @@ export class Content {
                     }
                     beitem.internalMessageVersion.set(eventMessageId, eventMessageVersion);
                     const privateData = this.decodeText(Uint8Array.from(event.privateDataByte));
-                    trace("EventMessageFired", eventMessageId, eventMessageVersion, privateData);
+                    this.logger.debug(`${this.logger.prefix}EventMessageFired`, eventMessageId, eventMessageVersion, privateData);
                     this.eventQueue.queueAsyncEvent(async () => {
                         this.eventDispatcher.setCurrentBeventEvent({
                             type: "EventMessageFired",

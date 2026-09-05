@@ -1,7 +1,5 @@
-import { Buffer } from "buffer";
-
 // RFC2068 7.1 Entity Header Fields
-//
+// 
 // entity-header  = Allow                    ; Section 14.7
 //                | Content-Base             ; Section 14.11
 //                | Content-Encoding         ; Section 14.12
@@ -15,7 +13,6 @@ import { Buffer } from "buffer";
 //                | Expires                  ; Section 14.21
 //                | Last-Modified            ; Section 14.29
 //                | extension-header
-
 
 // 2.2 Basic Rules
 
@@ -71,18 +68,46 @@ export type EntityHeader = {
 
 export type Entity = {
     headers: EntityHeader[],
-    body: Buffer,
+    body: Uint8Array,
     multipartBody: Entity[] | null,
 }
 
+const utf8Encoder = new TextEncoder();
+const utf8Decoder = new TextDecoder();
+export function indexOf(input: Uint8Array, search: Uint8Array, fromIndex: number) {
+    if (search.length === 0) {
+        return 0;
+    } else if (search.length > input.length - fromIndex) {
+        return -1;
+    }
+    let i = fromIndex;
+    while (true) {
+        i = input.indexOf(search[0], i);
+        if (i === -1) {
+            return -1;
+        }
+        let match = true;
+        for (let j = 1; j < search.length; j++) {
+            if (input[i + j] !== search[j]) {
+                match = false;
+                break;
+            }
+        }
+        if (match) {
+            return i;
+        }
+        i++;
+    }
+}
+
 export function parseMediaTypeFromString(mediaType: string): { mediaType: MediaType | null, error: boolean } {
-    const parser = new EntityParser(Buffer.from(mediaType));
+    const parser = new EntityParser(utf8Encoder.encode(mediaType));
     const fv = parser.readFieldValue();
     return parseMediaType(fv);
 }
 
 export class EntityParser {
-    buffer: Buffer;
+    buffer: Uint8Array;
     _offset: number;
     set offset(v: number) {
         this._offset = v;
@@ -90,7 +115,7 @@ export class EntityParser {
     get offset(): number {
         return this._offset;
     }
-    public constructor(buffer: Buffer) {
+    public constructor(buffer: Uint8Array) {
         this.buffer = buffer;
         this._offset = 0;
     }
@@ -121,7 +146,7 @@ export class EntityParser {
             }
         }
         const contentType = headers.find(x => x.name === "content-type");
-        let multipartBody: Entity[] | null = null;
+        let multipartBody = null;
         if (contentType != null && contentType.name === "content-type") {
             const mediaType = parseMediaType(contentType.value).mediaType;
             if (mediaType != null && mediaType.type === "multipart" && mediaType.subtype === "mixed") {
@@ -185,8 +210,9 @@ export class EntityParser {
             return null;
         }
         const boundary = boundaryParameter.value;
-        const delimiter = "--" + boundary + "\r\n";
-        const closeDelimiter = "--" + boundary + "--\r\n";
+        const delimiter = utf8Encoder.encode("--" + boundary + "\r\n");
+        const crlfDelimiter = utf8Encoder.encode("\r\n--" + boundary + "\r\n");
+        const crlfCloseDelimiter = utf8Encoder.encode("\r\n--" + boundary + "--\r\n");
         // delimiterまでdiscard-text
         // entity-body      = discard-text 1*encapsulation
         //                    close-delimiter discard-text
@@ -194,18 +220,18 @@ export class EntityParser {
         const entites: Entity[] = [];
         let isLast = false;
         while (!isLast) {
-            const bodyPartOffset = this.buffer.indexOf(delimiter, this.offset);
+            const bodyPartOffset = indexOf(this.buffer, delimiter, this.offset);
             if (bodyPartOffset !== -1) {
                 this.offset = bodyPartOffset + delimiter.length;
                 // delimiter body-part CRLF [delimiter body-part CRLF [delimiter body-part CRLF...]]
-                let nextBodyPartOffset = this.buffer.indexOf("\r\n" + delimiter, this.offset);
+                let nextBodyPartOffset = indexOf(this.buffer, crlfDelimiter, this.offset);
                 if (nextBodyPartOffset === -1) {
-                    nextBodyPartOffset = this.buffer.indexOf("\r\n" + closeDelimiter, this.offset);
+                    nextBodyPartOffset = indexOf(this.buffer, crlfCloseDelimiter, this.offset);
                     if (nextBodyPartOffset === -1) {
                         return null;
                     }
                     isLast = true;
-                    this.offset = nextBodyPartOffset + "\r\n".length + closeDelimiter.length;
+                    this.offset = nextBodyPartOffset + crlfCloseDelimiter.length;
                 } else {
                     this.offset = nextBodyPartOffset + "\r\n".length;
                 }
@@ -286,7 +312,7 @@ export class EntityParser {
         if (this.offset === beginOffset) {
             return null;
         }
-        return this.buffer.toString("ascii", beginOffset, this.offset);
+        return utf8Decoder.decode(this.buffer.subarray(beginOffset, this.offset));
     }
     readImpliedLWS() {
         while (this.readLWS()) { }
@@ -329,7 +355,7 @@ export class EntityParser {
             }
             result.push(char);
         }
-        return Buffer.from(result).toString("ascii");
+        return utf8Decoder.decode(Uint8Array.from(result));
     }
     // qdtext         = <any TEXT except <">>
     readQdText(): string {
@@ -364,7 +390,7 @@ export class EntityParser {
             }
             result.push(char);
         }
-        return Buffer.from(result).toString("ascii");
+        return utf8Decoder.decode(Uint8Array.from(result));
     }
     // quoted-string  = ( <"> *(qdtext) <"> )
     readQuotedString(): string | null {

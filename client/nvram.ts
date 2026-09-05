@@ -3,9 +3,7 @@ import { BinaryTableType, parseBinaryStructure, readBinaryFields, writeBinaryFie
 import { BroadcasterDatabase } from "./broadcaster_database";
 import { Resources } from "./resource";
 import { getTextDecoder, getTextEncoder } from "./text";
-import { getError } from "./util/logging";
-
-const error = getError("nvram");
+import { type Logger } from "./util/logger";
 
 type NvramAccessId =
     "broadcaster_id" | // 事業者ごと(BSとCS)
@@ -267,12 +265,14 @@ type AccessInfo = {
 
 
 export class NVRAM {
-    resources: Resources;
-    broadcasterDatabase: BroadcasterDatabase;
-    prefix: string;
-    constructor(resources: Resources, broadcasterDatabase: BroadcasterDatabase, prefix?: string) {
+    private readonly resources: Resources;
+    private readonly broadcasterDatabase: BroadcasterDatabase;
+    private readonly logger: Logger;
+    private readonly prefix: string;
+    constructor(resources: Resources, broadcasterDatabase: BroadcasterDatabase, logger: Logger, prefix?: string) {
         this.resources = resources;
         this.broadcasterDatabase = broadcasterDatabase;
+        this.logger = logger;
         this.prefix = prefix ?? "nvram_";
     }
 
@@ -320,34 +320,34 @@ export class NVRAM {
         for (const a of nvramArea.accessId) {
             if (a === "affiliation_id") {
                 if (broadcasterInfo.affiliationId == null) {
-                    error("affiliationId == null!");
+                    this.logger.error(`${this.logger.prefix}affiliationId == null!`);
                     params.append("affiliation_id", String(accessInfo.affiliationId));
                 } else if (accessInfo.affiliationId == null) {
-                    error("affiliationId == null!", accessInfo);
+                    this.logger.error(`${this.logger.prefix}affiliationId == null!`, accessInfo);
                     return null;
                 } else if (broadcasterInfo.affiliationId.includes(accessInfo.affiliationId)) {
                     params.append("affiliation_id", String(accessInfo.affiliationId));
                 } else {
-                    error("permission denied (affiliationId)", broadcasterInfo.affiliationId, accessInfo.affiliationId);
+                    this.logger.error(`${this.logger.prefix}permission denied (affiliationId)`, broadcasterInfo.affiliationId, accessInfo.affiliationId);
                     return null;
                 }
             } else if (a === "broadcaster_id") {
                 if (accessInfo.broadcasterId == null) {
-                    error("broadcasterId == null!");
+                    this.logger.error(`${this.logger.prefix}broadcasterId == null!`);
                     params.append("broadcaster_id", "null");
                 } else {
                     params.append("broadcaster_id", String(accessInfo.broadcasterId));
                 }
             } else if (a === "original_network_id") {
                 if (broadcasterInfo.originalNetworkId == null) {
-                    error("originalNetworkId == null!");
+                    this.logger.error(`${this.logger.prefix}originalNetworkId == null!`);
                     params.append("original_network_id", "null");
                 } else {
                     params.append("original_network_id", String(broadcasterInfo.originalNetworkId));
                 }
             } else if (a === "affiliation_id;original_network_id") {
                 if (accessInfo.affiliationId == null || accessInfo.originalNetworkId == null) {
-                    error("invalid", accessInfo);
+                    this.logger.error(`${this.logger.prefix}invalid`, accessInfo);
                     return null;
                 }
                 if (accessInfo.originalNetworkId >= 0x0000 && accessInfo.originalNetworkId <= 0x0003) {
@@ -356,27 +356,27 @@ export class NVRAM {
                     params.append("affiliation_id", String(accessInfo.affiliationId));
                 } else {
                     if (broadcasterInfo.originalNetworkId == null) {
-                        error("originalNetworkId == null!");
+                        this.logger.error(`${this.logger.prefix}originalNetworkId == null!`);
                         params.append("original_network_id", String(accessInfo.originalNetworkId));
                     } else if (accessInfo.originalNetworkId == null) {
-                        error("originalNetworkId == null!", accessInfo);
+                        this.logger.error(`${this.logger.prefix}originalNetworkId == null!`, accessInfo);
                         return null;
                     } else if (broadcasterInfo.originalNetworkId === accessInfo.originalNetworkId) {
                         params.append("original_network_id", String(accessInfo.originalNetworkId));
                     } else {
-                        error("permission denied (original_network_id)", broadcasterInfo.originalNetworkId, accessInfo.originalNetworkId);
+                        this.logger.error(`${this.logger.prefix}permission denied (original_network_id)`, broadcasterInfo.originalNetworkId, accessInfo.originalNetworkId);
                         return null;
                     }
                     if (broadcasterInfo.affiliationId == null) {
-                        error("affiliationId == null!");
+                        this.logger.error(`${this.logger.prefix}affiliationId == null!`);
                         params.append("affiliation_id", String(accessInfo.affiliationId));
                     } else if (accessInfo.affiliationId == null) {
-                        error("affiliationId == null!", accessInfo);
+                        this.logger.error(`${this.logger.prefix}affiliationId == null!`, accessInfo);
                         return null;
                     } else if (broadcasterInfo.affiliationId.includes(accessInfo.affiliationId)) {
                         params.append("affiliation_id", String(accessInfo.affiliationId));
                     } else {
-                        error("permission denied (affiliationId)", broadcasterInfo.affiliationId, accessInfo.affiliationId);
+                        this.logger.error(`${this.logger.prefix}permission denied (affiliationId)`, broadcasterInfo.affiliationId, accessInfo.affiliationId);
                         return null;
                     }
                 }
@@ -393,13 +393,13 @@ export class NVRAM {
             const key = `${broadcasterInfo.originalNetworkId}.${broadcasterInfo.broadcasterId}`;
             const blockPermission = this.providerAreaPermission.get(key);
             if (blockPermission == null) {
-                error("permission not set (nvrams)");
+                this.logger.error(`${this.logger.prefix}permission not set (nvrams)`);
                 return null;
             }
             if (accessInfo.block != null) {
                 const allowedServiceId = blockPermission.serviceIdList[accessInfo.block];
                 if (allowedServiceId !== 0xffff && allowedServiceId !== broadcasterInfo.serviceId) {
-                    error("permission denied (nvrams serviceId)", allowedServiceId, broadcasterInfo.serviceId);
+                    this.logger.error(`${this.logger.prefix}permission denied (nvrams serviceId)`, allowedServiceId, broadcasterInfo.serviceId);
                     return null;
                 }
             }
@@ -433,13 +433,13 @@ export class NVRAM {
             const binfo = this.getBroadcasterInfo();
             const result = this.findNvramArea(uri, binfo);
             if (!result) {
-                error("readNVRAM: findNvramArea failed", uri);
+                this.logger.error(`${this.logger.prefix}readNVRAM: findNvramArea failed`, uri);
                 return null;
             }
             const [id, area] = result;
             const k = this.getLocalStorageKey(binfo, id, area);
             if (!k) {
-                error("readNVRAM: access denied", uri);
+                this.logger.error(`${this.logger.prefix}readNVRAM: access denied`, uri);
                 return null;
             }
             strg = localStorage.getItem(this.prefix + k);
@@ -493,19 +493,19 @@ export class NVRAM {
         const binfo = this.getBroadcasterInfo();
         const result = this.findNvramArea(uri, binfo);
         if (!result) {
-            error("writeNVRAM: findNvramArea failed", uri);
+            this.logger.error(`${this.logger.prefix}writeNVRAM: findNvramArea failed`, uri);
             return NaN;
         }
         const [id, area] = result;
         if (area.isFixed) {
             if (data.length > area.size) {
-                error("writeNVRAM: too large data", uri, data.length, area);
+                this.logger.error(`${this.logger.prefix}writeNVRAM: too large data`, uri, data.length, area);
                 return NaN;
             }
         }
         const k = this.getLocalStorageKey(binfo, id, area);
         if (!k) {
-            error("writeNVRAM: access denied", uri);
+            this.logger.error(`${this.logger.prefix}writeNVRAM: access denied`, uri);
             return NaN;
         }
         if (area.isSecure && id.block != null) {
@@ -536,7 +536,7 @@ export class NVRAM {
             return result;
         } catch (caughtError) {
             // 不正な構造や保存データは BML 側へ例外を漏らさず null で通知する
-            error("readPersistentArray: failed to decode data", filename, caughtError);
+            this.logger.error(`${this.logger.prefix}readPersistentArray: failed to decode data`, filename, caughtError);
             return null;
         }
     }
@@ -551,7 +551,7 @@ export class NVRAM {
         }
         const dataFieldCount = fields.filter(field => field.type !== BinaryTableType.Pad).length;
         if (dataFieldCount > data.length) {
-            error("writePersistentArray: dataFieldCount > data.length");
+            this.logger.error(`${this.logger.prefix}writePersistentArray: dataFieldCount > data.length`);
             return NaN;
         }
         try {
@@ -559,7 +559,7 @@ export class NVRAM {
             return this.writeNVRAM(filename, bin, force ?? false);
         } catch (caughtError) {
             // エンコードや保存の失敗は BML 側へ例外を漏らさず NaN で通知する
-            error("writePersistentArray: failed to encode or save data", filename, caughtError);
+            this.logger.error(`${this.logger.prefix}writePersistentArray: failed to encode or save data`, filename, caughtError);
             return NaN;
         }
     }
@@ -626,9 +626,9 @@ export class NVRAM {
         try {
             const [result] = readBinaryFields(a, fields, getTextDecoder(this.resources.profile));
             return result;
-        } catch (caughtError) {
+        } catch (e) {
             // 不正な構造や保存データは BML 側へ例外を漏らさず null で通知する
-            error("readPersistentArrayWithAccessCheck: failed to decode data", filename, caughtError);
+            this.logger.error(`${this.logger.prefix}readPersistentArrayWithAccessCheck: failed to decode data`, filename, e);
             return null;
         }
     }
@@ -643,15 +643,15 @@ export class NVRAM {
         }
         const dataFieldCount = fields.filter(field => field.type !== BinaryTableType.Pad).length;
         if (dataFieldCount > data.length) {
-            error("writePersistentArrayWithAccessCheck: dataFieldCount > data.length");
+            this.logger.error(`${this.logger.prefix}writePersistentArrayWithAccessCheck: dataFieldCount > data.length`);
             return NaN;
         }
         try {
             const bin = writeBinaryFields(data, fields, getTextEncoder(this.resources.profile));
             return this.writeNVRAM(filename, bin, false);
-        } catch (caughtError) {
+        } catch (e) {
             // エンコードや保存の失敗は BML 側へ例外を漏らさず NaN で通知する
-            error("writePersistentArrayWithAccessCheck: failed to encode or save data", filename, caughtError);
+            this.logger.error(`${this.logger.prefix}writePersistentArrayWithAccessCheck: failed to encode or save data`, filename, e);
             return NaN;
         }
     }

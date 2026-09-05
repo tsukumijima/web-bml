@@ -18,8 +18,15 @@
  * 15:
 **/
 
-import { Buffer } from "buffer";
 import { romsoundData } from "./romsound_data";
+
+function fromBase64(input: string): Uint8Array<ArrayBuffer> {
+    if ("fromBase64" in globalThis.Uint8Array) {
+        return Uint8Array.fromBase64(input);
+    } else {
+        return Uint8Array.from(window.atob(input), c => c.charCodeAt(0));
+    }
+}
 
 function playBuffer(destination: AudioNode, buf: Float32Array<ArrayBuffer>, sampleRate: number) {
     const buffer = destination.context.createBuffer(1, buf.length, sampleRate)
@@ -40,7 +47,7 @@ export function playRomSound(soundId: number, destination: AudioNode): boolean {
         if (data == null) {
             return false;
         }
-        const buffer = Buffer.from(data, "base64").buffer;
+        const buffer = fromBase64(data).buffer;
         destination.context.decodeAudioData(buffer).then((audioBuffer) => {
             const cache = { buffer: audioBuffer.getChannelData(0), sampleRate: audioBuffer.sampleRate };
             romSoundCache.set(soundId, cache);

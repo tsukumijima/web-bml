@@ -1,28 +1,3 @@
-import { MediaType } from "./entity_parser";
-
-// /api/ws?param=JSON
-
-// Mirakurun系のAPIを使ってtsを取得
-// /api/channels/{type}/{channel}/services/{id}/stream
-export type MirakLiveParam = {
-    type: "mirakLive",
-    channelType: "GR" | "BS" | "CS" | "SKY",
-    channel: string,
-    serviceId?: number,
-};
-
-// EPGStationのAPIを使ってtsを取得
-export type EPGStationRecordedParam = {
-    type: "epgStationRecorded"
-    videoFileId: number,
-};
-
-export type BaseParam =  { demultiplexServiceId?: number, seek?: number };
-
-export type Param = (MirakLiveParam | EPGStationRecordedParam) & BaseParam;
-
-export type RequestMessage = {};
-
 export type ComponentPMT = {
     pid: number,
     componentId: number,
@@ -65,6 +40,9 @@ export type PMTMessage = {
     components: ComponentPMT[],
 };
 
+import type { MediaType } from "./entity_parser";
+
+export type { MediaType };
 export type ModuleFile = {
     contentLocation: string | null,
     contentType: MediaType,
@@ -122,7 +100,7 @@ export type NPTReference = {
     STCReference: number,
     NPTReference: number,
     scaleNumerator: number,
-    scaleDenominator: number,
+    scaleDenominator: number,  
 };
 
 export type ESEventUpdatedMessage = {
